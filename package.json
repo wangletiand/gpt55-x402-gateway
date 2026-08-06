@@ -1,0 +1,31 @@
+{
+  "name": "gpt55-x402-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Read-only MCP directory wrapper and quote-first x402 buyer client for GPT55.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wangletiand/gpt55-x402-gateway.git"
+  },
+  "homepage": "https://gpt55.558686.xyz/x402/service",
+  "scripts": {
+    "start": "node server.mjs",
+    "smoke": "node smoke.mjs",
+    "test:payment-policy": "node --test tests/trusted-payment-policy.test.mjs",
+    "test:fallback": "node --test tests/fallback-catalog.test.mjs",
+    "test:publication": "node scripts/test-publication-safety.mjs",
+    "test": "npm run test:payment-policy && npm run test:fallback && npm run test:publication && npm run smoke",
+    "first-payment:quote": "node first-payment-client.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "optionalDependencies": {
+    "@x402/core": "^2.16.0",
+    "@x402/evm": "^2.16.0",
+    "@x402/fetch": "^2.16.0",
+    "viem": "^2.53.1"
+  },
+  "license": "MIT"
+}
