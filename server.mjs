@@ -9,13 +9,66 @@ const PUBLIC_REPOSITORY = Object.freeze({
   url: "https://github.com/wangletiand/gpt55-x402-gateway.git",
   webUrl: "https://github.com/wangletiand/gpt55-x402-gateway",
 });
-const PRIMARY_COMMERCIAL_OFFER = Object.freeze({
+const KEY_PACK_DELIVERY_TRIAL = Object.freeze({
+  routeId: "api-codex-key-pack-1",
+  label: "Start the $0.12 delivery trial",
+  method: "GET",
+  price: "$0.12",
+  amountAtomic: "120000",
+  quotaUsd: 1,
+  paidUrl: "https://x402-key.558686.xyz/v1/paid/api-codex-key-pack-1",
+  quoteUrl: "https://x402-key.558686.xyz/x402/quote/api-codex-key-pack-1",
+  paymentActivation: "https://x402-key.558686.xyz/x402/route/api-codex-key-pack-1/payment-activation.json",
+  firstPaymentClient: "https://x402-key.558686.xyz/x402/route/api-codex-key-pack-1/first-payment-client.mjs",
+  purpose: "Validate a buyer-owned Base USDC payment and one-time API key delivery before the commercial purchase.",
+  commercialPackRouteId: "api-codex-key-pack-100",
+  commercialPackPrice: "$11.1112",
+  commercialUpgrade: Object.freeze({
+    routeId: "api-codex-key-pack-100",
+    price: "$11.1112",
+    amountAtomic: "11111200",
+    quotaUsd: 100,
+    paidUrl: "https://x402-key.558686.xyz/v1/paid/api-codex-key-pack-100",
+    quoteUrl: "https://x402-key.558686.xyz/x402/quote/api-codex-key-pack-100",
+    paymentActivation: "https://x402-key.558686.xyz/x402/route/api-codex-key-pack-100/payment-activation.json",
+    firstPaymentClient: "https://x402-key.558686.xyz/x402/route/api-codex-key-pack-100/first-payment-client.mjs",
+    previousPurchaseAppliedToUpgrade: false,
+  }),
+  trialPaymentCreditsCommercialPack: false,
+  nonCreditPolicy: "The $0.12 trial does not reduce the commercial pack price.",
+});
+const KEY_PACK_UPGRADE_OFFER = Object.freeze({
   routeId: "api-codex-key-pack-100",
   method: "GET",
   paidUrl: "https://x402-key.558686.xyz/v1/paid/api-codex-key-pack-100",
+  checkoutUrl: "https://x402-key.558686.xyz/x402/checkout",
   price: "$11.1112",
   amountAtomic: "11111200",
   quotaUsd: 100,
+  deliveryTrial: KEY_PACK_DELIVERY_TRIAL,
+});
+const PRIMARY_COMMERCIAL_OFFER = Object.freeze({
+  id: "standard-chat-demand-first",
+  routeId: "standard-chat",
+  title: "GPT-5.6 Luna Standard one-request result",
+  method: "POST",
+  paidUrl: `${PUBLIC_SERVICE_ORIGIN}/v1/chat/completions/standard`,
+  checkoutUrl: `${CANONICAL_SERVICE_HUB}?checkout=standard-chat`,
+  price: "$0.00293",
+  amountAtomic: "2930",
+  browserCheckout: Object.freeze({
+    available: true,
+    url: `${CANONICAL_SERVICE_HUB}?checkout=standard-chat`,
+    bundleUrl: `${PUBLIC_SERVICE_ORIGIN}/x402/browser-wallet-payment.js`,
+    privateKeySentToService: false,
+  }),
+  agentFallback: Object.freeze({
+    routeId: "standard",
+    firstPaymentClient: `${PUBLIC_SERVICE_ORIGIN}/x402/first-payment-client.mjs`,
+    quoteOnlyCommand: "ROUTE_ID=standard MAX_USDC=0.00293 node first-payment-client.mjs",
+    privateKeySentToService: false,
+  }),
+  nextPurchase: KEY_PACK_UPGRADE_OFFER,
 });
 const REMOTE_BASE_URL = process.env.REMOTE_BASE_URL || "https://gpt55.558686.xyz";
 const CANONICAL_MCP_URL = `${REMOTE_BASE_URL}/mcp`;
@@ -127,7 +180,7 @@ function localInitialize(id) {
     },
     serverInfo: {
       name: "gpt55-x402-gateway",
-      title: "GPT-5.5 x402 Gateway",
+      title: "GPT55 GPT-5.6 Luna Standard x402 Gateway",
       version: "1.0.0",
     },
     instructions:
@@ -140,9 +193,9 @@ function localToolsList(id) {
     tools: [
       {
         name: "gpt55_gateway_directory",
-        title: "GPT-5.5 x402 Gateway Directory",
+        title: "GPT55 GPT-5.6 Luna Standard x402 Directory",
         description:
-          "Returns public endpoint, pricing, x402 discovery, and buyer-guide links for the remote GPT-5.5 x402 gateway.",
+          "Returns public endpoint, pricing, x402 discovery, and buyer-guide links for the GPT-5.6 Luna Standard x402 gateway.",
         inputSchema: {
           type: "object",
           properties: {},
@@ -183,7 +236,7 @@ function localToolCall(id, params = {}) {
 function localBuyerGuide() {
   return {
     schemaVersion: "2026-08-06",
-    title: "GPT-5.5 x402 Buyer Guide",
+    title: "GPT55 GPT-5.6 Luna Standard x402 Buyer Guide",
     repository: { ...PUBLIC_REPOSITORY },
     canonicalUrl: CANONICAL_SERVICE_HUB,
     startUrl: CANONICAL_SERVICE_HUB,
@@ -191,7 +244,7 @@ function localBuyerGuide() {
     buyUrl: CANONICAL_SERVICE_HUB,
     startApplyBuyUrl: CANONICAL_SERVICE_HUB,
     service: {
-      name: "GPT-5.5 x402 API Gateway",
+      name: "GPT55 GPT-5.6 Luna Standard x402 API Gateway",
       baseUrl: PUBLIC_SERVICE_ORIGIN,
       openaiCompatible: true,
       accountRequired: false,
@@ -207,11 +260,16 @@ function localBuyerGuide() {
       upto: { enabled: false, description: "Disabled on the public production gateway; live 402 quotes advertise exact x402 only." },
     },
     primaryCommercialOffer: { ...PRIMARY_COMMERCIAL_OFFER },
+    demandFirstOffer: { ...PRIMARY_COMMERCIAL_OFFER },
+    firstPurchase: { ...PRIMARY_COMMERCIAL_OFFER },
+    recommendedFirstPurchase: { ...PRIMARY_COMMERCIAL_OFFER },
+    nextPurchase: { ...KEY_PACK_UPGRADE_OFFER },
+    keyPackUpgradeOffer: { ...KEY_PACK_UPGRADE_OFFER },
     quickstart: {
       lowestCostProofUrl: `${PUBLIC_SERVICE_ORIGIN}/v1/x402-ping`,
       recommendedFirstRouteId: PRIMARY_COMMERCIAL_OFFER.routeId,
       recommendedFirstPaidUrl: PRIMARY_COMMERCIAL_OFFER.paidUrl,
-      spendCapUsd: 11.12,
+      spendCapUsd: 0.003,
     },
     livePrices: {
       pricing: `${PUBLIC_SERVICE_ORIGIN}/pricing.json`,
@@ -241,12 +299,40 @@ function normalizeBuyerGuideForWrapper(guide) {
   normalized.applyUrl = CANONICAL_SERVICE_HUB;
   normalized.buyUrl = CANONICAL_SERVICE_HUB;
   normalized.startApplyBuyUrl = CANONICAL_SERVICE_HUB;
+  normalized.primaryCommercialOffer = { ...PRIMARY_COMMERCIAL_OFFER };
+  normalized.demandFirstOffer = { ...PRIMARY_COMMERCIAL_OFFER };
+  normalized.firstPurchase = { ...PRIMARY_COMMERCIAL_OFFER };
+  normalized.recommendedFirstPurchase = { ...PRIMARY_COMMERCIAL_OFFER };
+  normalized.nextPurchase = normalizeKeyPackUpgrade(normalized.nextPurchase);
+  normalized.keyPackUpgradeOffer = normalizeKeyPackUpgrade(normalized.keyPackUpgradeOffer);
+  normalized.buyerPaths = normalizePrimaryBuyerPaths(normalized.buyerPaths);
+  normalized.primaryRouteId = PRIMARY_COMMERCIAL_OFFER.routeId;
+  normalized.primaryPaidUrl = PRIMARY_COMMERCIAL_OFFER.paidUrl;
   return normalized;
+}
+
+function normalizePrimaryBuyerPaths(buyerPaths) {
+  const preserved = Array.isArray(buyerPaths)
+    ? buyerPaths.filter((path) => path?.routeId !== PRIMARY_COMMERCIAL_OFFER.routeId)
+    : [];
+  return [{ ...PRIMARY_COMMERCIAL_OFFER }, ...preserved];
+}
+
+function normalizeKeyPackUpgrade(offer) {
+  const current = offer && typeof offer === "object" && !Array.isArray(offer) ? offer : {};
+  const currentTrial = current.deliveryTrial && typeof current.deliveryTrial === "object"
+    ? current.deliveryTrial
+    : {};
+  return {
+    ...current,
+    ...KEY_PACK_UPGRADE_OFFER,
+    deliveryTrial: { ...currentTrial, ...KEY_PACK_DELIVERY_TRIAL },
+  };
 }
 
 function localPricing() {
   return {
-    service: "GPT-5.5 x402 API Gateway",
+    service: "GPT55 GPT-5.6 Luna Standard x402 API Gateway",
     repository: { ...PUBLIC_REPOSITORY },
     canonicalUrl: CANONICAL_SERVICE_HUB,
     startUrl: CANONICAL_SERVICE_HUB,
@@ -262,10 +348,15 @@ function localPricing() {
       schemes: ["exact"],
     },
     primaryCommercialOffer: { ...PRIMARY_COMMERCIAL_OFFER },
+    demandFirstOffer: { ...PRIMARY_COMMERCIAL_OFFER },
+    firstPurchase: { ...PRIMARY_COMMERCIAL_OFFER },
+    recommendedFirstPurchase: { ...PRIMARY_COMMERCIAL_OFFER },
+    nextPurchase: { ...KEY_PACK_UPGRADE_OFFER },
+    keyPackUpgradeOffer: { ...KEY_PACK_UPGRADE_OFFER },
     endpoints: [
-      { id: "api-codex-key-pack-100", method: "GET", path: "/v1/paid/api-codex-key-pack-100", url: PRIMARY_COMMERCIAL_OFFER.paidUrl, price: "$11.1112", amountAtomic: "11111200" },
+      { id: "main-model-standard", method: "POST", path: "/v1/chat/completions/standard", url: PRIMARY_COMMERCIAL_OFFER.paidUrl, price: PRIMARY_COMMERCIAL_OFFER.price, amountAtomic: PRIMARY_COMMERCIAL_OFFER.amountAtomic },
+      { id: "api-codex-key-pack-100", method: "GET", path: "/v1/paid/api-codex-key-pack-100", url: KEY_PACK_UPGRADE_OFFER.paidUrl, price: KEY_PACK_UPGRADE_OFFER.price, amountAtomic: KEY_PACK_UPGRADE_OFFER.amountAtomic },
       { id: "x402-ping", method: "GET or POST", path: "/v1/x402-ping", url: `${PUBLIC_SERVICE_ORIGIN}/v1/x402-ping`, price: "$0.002", amountAtomic: "2000" },
-      { id: "main-model-standard", method: "POST", path: "/v1/chat/completions/standard", url: `${PUBLIC_SERVICE_ORIGIN}/v1/chat/completions/standard`, price: "$0.00293", amountAtomic: "2930" },
       { id: "gpt-5.5", method: "POST", path: "/v1/chat/completions/gpt-5.5", url: `${PUBLIC_SERVICE_ORIGIN}/v1/chat/completions/gpt-5.5`, price: "$0.019999", amountAtomic: "19999" },
     ],
   };
@@ -281,6 +372,15 @@ function normalizePricingForWrapper(pricing) {
   normalized.applyUrl = CANONICAL_SERVICE_HUB;
   normalized.buyUrl = CANONICAL_SERVICE_HUB;
   normalized.startApplyBuyUrl = CANONICAL_SERVICE_HUB;
+  normalized.primaryCommercialOffer = { ...PRIMARY_COMMERCIAL_OFFER };
+  normalized.demandFirstOffer = { ...PRIMARY_COMMERCIAL_OFFER };
+  normalized.firstPurchase = { ...PRIMARY_COMMERCIAL_OFFER };
+  normalized.recommendedFirstPurchase = { ...PRIMARY_COMMERCIAL_OFFER };
+  normalized.nextPurchase = normalizeKeyPackUpgrade(normalized.nextPurchase);
+  normalized.keyPackUpgradeOffer = normalizeKeyPackUpgrade(normalized.keyPackUpgradeOffer);
+  normalized.buyerPaths = normalizePrimaryBuyerPaths(normalized.buyerPaths);
+  normalized.primaryRouteId = PRIMARY_COMMERCIAL_OFFER.routeId;
+  normalized.primaryPaidUrl = PRIMARY_COMMERCIAL_OFFER.paidUrl;
   return normalized;
 }
 

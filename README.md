@@ -1,16 +1,24 @@
 # GPT55 x402 Gateway
 
-This repository contains a small, read-only MCP directory wrapper and a
-quote-first buyer client for the public GPT55 x402 service.
+Buy one useful GPT-5.6 Luna Standard OpenAI-compatible response for **$0.00293
+USDC**. The primary paid route is
+`POST https://gpt55.558686.xyz/v1/chat/completions/standard`.
+
+Open the service hub and use **Pay with browser wallet** from an injected Base
+wallet. The wallet signs only the exact live USDC authorization; no private key
+is sent to the service. The quote-first buyer client in this repository remains
+the agent fallback. The $11.1112 Key Pack is the upgrade for repeated calls.
 
 Canonical service entry:
 
 - Service hub: <https://gpt55.558686.xyz/x402/service>
 - Machine-readable catalog: <https://gpt55.558686.xyz/x402/service.json>
 - Main model route: `POST https://gpt55.558686.xyz/v1/chat/completions/standard`
+- Browser wallet checkout: <https://gpt55.558686.xyz/x402/service?checkout=standard-chat>
+- Key Pack upgrade: <https://x402-key.558686.xyz/x402/checkout>
 - MCP endpoint: <https://gpt55.558686.xyz/mcp>
 
-## Safety Model
+## Agent Fallback
 
 The buyer client is quote-only by default. Its local policy pins the exact URL,
 HTTP method, amount, Base network, canonical Base USDC contract, and merchant

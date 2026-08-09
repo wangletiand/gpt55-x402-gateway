@@ -11,7 +11,8 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const canonicalHub = 'https://gpt55.558686.xyz/x402/service';
 const repositoryUrl = 'https://github.com/wangletiand/gpt55-x402-gateway';
 const repositoryGitUrl = `${repositoryUrl}.git`;
-const primaryPaidUrl = 'https://x402-key.558686.xyz/v1/paid/api-codex-key-pack-100';
+const primaryPaidUrl = 'https://gpt55.558686.xyz/v1/chat/completions/standard';
+const keyPackPaidUrl = 'https://x402-key.558686.xyz/v1/paid/api-codex-key-pack-100';
 
 test('wrapper serves the current minimal catalog when the upstream is unavailable', async () => {
   const port = await reservePort();
@@ -36,18 +37,19 @@ test('wrapper serves the current minimal catalog when the upstream is unavailabl
     ]);
 
     assertCanonicalEntry(guide);
-    assert.equal(guide.primaryCommercialOffer.routeId, 'api-codex-key-pack-100');
+    assert.equal(guide.primaryCommercialOffer.routeId, 'standard-chat');
     assert.equal(guide.primaryCommercialOffer.paidUrl, primaryPaidUrl);
-    assert.equal(guide.primaryCommercialOffer.price, '$11.1112');
-    assert.equal(guide.primaryCommercialOffer.amountAtomic, '11111200');
+    assert.equal(guide.primaryCommercialOffer.price, '$0.00293');
+    assert.equal(guide.primaryCommercialOffer.amountAtomic, '2930');
+    assert.equal(guide.keyPackUpgradeOffer.routeId, 'api-codex-key-pack-100');
 
     assertCanonicalEntry(pricing);
     assert.deepEqual(
       pricing.endpoints.map(({ id, path, price, amountAtomic }) => ({ id, path, price, amountAtomic })),
       [
+        { id: 'main-model-standard', path: '/v1/chat/completions/standard', price: '$0.00293', amountAtomic: '2930' },
         { id: 'api-codex-key-pack-100', path: '/v1/paid/api-codex-key-pack-100', price: '$11.1112', amountAtomic: '11111200' },
         { id: 'x402-ping', path: '/v1/x402-ping', price: '$0.002', amountAtomic: '2000' },
-        { id: 'main-model-standard', path: '/v1/chat/completions/standard', price: '$0.00293', amountAtomic: '2930' },
         { id: 'gpt-5.5', path: '/v1/chat/completions/gpt-5.5', price: '$0.019999', amountAtomic: '19999' },
       ],
     );
@@ -59,9 +61,17 @@ test('wrapper serves the current minimal catalog when the upstream is unavailabl
   assert.equal(stderr, '');
 });
 
-test('wrapper normalizes repository and buyer CTAs in successful remote pricing', async () => {
-  const remotePricing = {
-    service: 'Remote pricing sentinel',
+test('wrapper replaces stale Key Pack primaries in successful remote catalogs', async () => {
+  const staleKeyPackPrimary = {
+    routeId: 'api-codex-key-pack-100',
+    method: 'GET',
+    paidUrl: keyPackPaidUrl,
+    checkoutUrl: 'https://x402-key.558686.xyz/x402/checkout',
+    price: '$11.1112',
+    amountAtomic: '11111200',
+  };
+  const remoteCatalog = {
+    service: 'Remote catalog sentinel',
     repository: {
       url: 'https://github.com/legacy-owner/legacy-repository.git',
       webUrl: 'https://github.com/legacy-owner/legacy-repository',
@@ -73,10 +83,26 @@ test('wrapper normalizes repository and buyer CTAs in successful remote pricing'
     startApplyBuyUrl: 'https://legacy.invalid/checkout',
     currency: 'USD',
     endpoints: [{ id: 'remote-sentinel', path: '/remote-sentinel', price: '$1.23' }],
+    primaryCommercialOffer: { ...staleKeyPackPrimary },
+    demandFirstOffer: { ...staleKeyPackPrimary },
+    firstPurchase: { ...staleKeyPackPrimary },
+    recommendedFirstPurchase: { ...staleKeyPackPrimary },
+    buyerPaths: [
+      { ...staleKeyPackPrimary, id: 'api-codex-key-pack-100' },
+      { id: 'remote-secondary', routeId: 'remote-secondary', paidUrl: 'https://legacy.invalid/secondary' },
+    ],
+    primaryRouteId: staleKeyPackPrimary.routeId,
+    primaryPaidUrl: staleKeyPackPrimary.paidUrl,
+    keyPackUpgradeOffer: {
+      ...staleKeyPackPrimary,
+      remoteExtension: 'preserved-upgrade-extension',
+      deliveryTrial: { remoteTrialExtension: 'preserved-trial-extension' },
+    },
   };
   const remote = createServer((req, res) => {
-    const body = JSON.stringify(remotePricing);
-    res.writeHead(req.url === '/pricing.json' ? 200 : 404, {
+    const found = req.url === '/pricing.json' || req.url === '/buyer-guide.json';
+    const body = JSON.stringify(remoteCatalog);
+    res.writeHead(found ? 200 : 404, {
       'content-type': 'application/json',
       'content-length': Buffer.byteLength(body),
     });
@@ -102,13 +128,26 @@ test('wrapper normalizes repository and buyer CTAs in successful remote pricing'
 
   try {
     await waitForHealth(port, child);
-    const pricing = await fetchJson(`http://127.0.0.1:${port}/pricing.json`);
-    assertCanonicalEntry(pricing);
-    assert.equal(pricing.startUrl, canonicalHub);
-    assert.equal(pricing.applyUrl, canonicalHub);
-    assert.equal(pricing.buyUrl, canonicalHub);
-    assert.equal(pricing.service, remotePricing.service);
-    assert.deepEqual(pricing.endpoints, remotePricing.endpoints);
+    for (const pathname of ['/buyer-guide.json', '/pricing.json']) {
+      const catalog = await fetchJson(`http://127.0.0.1:${port}${pathname}`);
+      assertCanonicalEntry(catalog);
+      assert.equal(catalog.startUrl, canonicalHub);
+      assert.equal(catalog.applyUrl, canonicalHub);
+      assert.equal(catalog.buyUrl, canonicalHub);
+      assert.equal(catalog.service, remoteCatalog.service);
+      assert.deepEqual(catalog.endpoints, remoteCatalog.endpoints);
+      assert.equal(catalog.primaryCommercialOffer.routeId, 'standard-chat');
+      assert.equal(catalog.firstPurchase.routeId, 'standard-chat');
+      assert.equal(catalog.recommendedFirstPurchase.routeId, 'standard-chat');
+      assert.equal(catalog.buyerPaths[0].routeId, 'standard-chat');
+      assert.equal(catalog.buyerPaths.filter(({ routeId }) => routeId === 'standard-chat').length, 1);
+      assert.equal(catalog.buyerPaths.find(({ routeId }) => routeId === 'remote-secondary')?.paidUrl, 'https://legacy.invalid/secondary');
+      assert.equal(catalog.primaryRouteId, 'standard-chat');
+      assert.equal(catalog.primaryPaidUrl, primaryPaidUrl);
+      assert.equal(catalog.keyPackUpgradeOffer.routeId, 'api-codex-key-pack-100');
+      assert.equal(catalog.keyPackUpgradeOffer.remoteExtension, 'preserved-upgrade-extension');
+      assert.equal(catalog.keyPackUpgradeOffer.deliveryTrial.remoteTrialExtension, 'preserved-trial-extension');
+    }
   } finally {
     child.kill('SIGTERM');
     await Promise.race([once(child, 'exit'), new Promise((resolve) => setTimeout(resolve, 2_000))]);
@@ -139,7 +178,7 @@ test('checked-in discovery metadata routes canonical buyer actions through the h
   }
   assert.equal(
     serverJson.buyerPaths.find(({ id }) => id === 'api-codex-key-pack-100').paidUrl,
-    primaryPaidUrl,
+    keyPackPaidUrl,
   );
   assert.deepEqual(findUnsafePrivateKeyCommands(serverJson), []);
   assert.equal(packageJson.homepage, canonicalHub);
