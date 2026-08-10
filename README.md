@@ -18,6 +18,9 @@ Canonical service entry:
 - Key Pack upgrade: <https://x402-key.558686.xyz/x402/checkout>
 - MCP endpoint: <https://gpt55.558686.xyz/mcp>
 
+For the exact browser-wallet, Base MCP, agent fallback, receipt, and directory
+verification sequence, see [docs/demand-first-checkout.md](docs/demand-first-checkout.md).
+
 ## Agent Fallback
 
 The buyer client is quote-only by default. Its local policy pins the exact URL,
