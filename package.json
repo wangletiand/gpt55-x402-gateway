@@ -16,7 +16,8 @@
     "test:fallback": "node --test tests/fallback-catalog.test.mjs",
     "test:offer-convergence": "node --test tests/public-offer-convergence.test.mjs",
     "test:publication": "node scripts/test-publication-safety.mjs",
-    "test": "npm run test:payment-policy && npm run test:fallback && npm run test:offer-convergence && npm run test:publication && npm run smoke",
+    "test:demand-first": "node scripts/test-demand-first-discovery-guide.mjs",
+    "test": "npm run test:payment-policy && npm run test:fallback && npm run test:offer-convergence && npm run test:publication && npm run test:demand-first && npm run smoke",
     "first-payment:quote": "node first-payment-client.mjs"
   },
   "engines": {
