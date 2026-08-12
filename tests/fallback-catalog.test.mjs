@@ -42,6 +42,8 @@ test('wrapper serves the current minimal catalog when the upstream is unavailabl
     assert.equal(guide.primaryCommercialOffer.paidUrl, primaryPaidUrl);
     assert.equal(guide.primaryCommercialOffer.price, '$0.001');
     assert.equal(guide.primaryCommercialOffer.amountAtomic, '1000');
+    assert.equal(guide.quickstart.recommendedFirstRouteId, 'evm-wallet-balance');
+    assert.equal(guide.quickstart.spendCapUsd, 0.001);
     assert.equal(guide.standardChatAlternative.routeId, 'standard-chat');
     assert.equal(guide.standardChatAlternative.paidUrl, standardPaidUrl);
     assert.equal(guide.keyPackUpgradeOffer.routeId, 'api-codex-key-pack-100');

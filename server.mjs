@@ -205,7 +205,7 @@ function localInitialize(id) {
     },
     serverInfo: {
       name: "gpt55-x402-gateway",
-      title: "GPT55 GPT-5.6 Luna Standard x402 Gateway",
+      title: "GPT55 Wallet and GPT-5.6 Luna Standard x402 Gateway",
       version: "1.0.0",
     },
     instructions:
@@ -218,9 +218,9 @@ function localToolsList(id) {
     tools: [
       {
         name: "gpt55_gateway_directory",
-        title: "GPT55 GPT-5.6 Luna Standard x402 Directory",
+        title: "GPT55 Wallet and GPT-5.6 Luna Standard x402 Directory",
         description:
-          "Returns public endpoint, pricing, x402 discovery, and buyer-guide links for the GPT-5.6 Luna Standard x402 gateway.",
+          "Returns public endpoint, pricing, x402 discovery, and buyer-guide links for the Wallet-first GPT55 x402 gateway and Standard alternative.",
         inputSchema: {
           type: "object",
           properties: {},
@@ -261,7 +261,7 @@ function localToolCall(id, params = {}) {
 function localBuyerGuide() {
   return {
     schemaVersion: "2026-08-06",
-    title: "GPT55 GPT-5.6 Luna Standard x402 Buyer Guide",
+    title: "GPT55 Wallet and GPT-5.6 Luna Standard x402 Buyer Guide",
     repository: { ...PUBLIC_REPOSITORY },
     canonicalUrl: CANONICAL_SERVICE_HUB,
     startUrl: CANONICAL_SERVICE_HUB,
@@ -269,7 +269,7 @@ function localBuyerGuide() {
     buyUrl: CANONICAL_SERVICE_HUB,
     startApplyBuyUrl: CANONICAL_SERVICE_HUB,
     service: {
-      name: "GPT55 GPT-5.6 Luna Standard x402 API Gateway",
+      name: "GPT55 Wallet and GPT-5.6 Luna Standard x402 API Gateway",
       baseUrl: PUBLIC_SERVICE_ORIGIN,
       openaiCompatible: true,
       accountRequired: false,
@@ -295,7 +295,7 @@ function localBuyerGuide() {
       lowestCostProofUrl: `${PUBLIC_SERVICE_ORIGIN}/v1/x402-ping`,
       recommendedFirstRouteId: PRIMARY_COMMERCIAL_OFFER.routeId,
       recommendedFirstPaidUrl: PRIMARY_COMMERCIAL_OFFER.paidUrl,
-    spendCapUsd: 0.003,
+      spendCapUsd: 0.001,
     },
     livePrices: {
       pricing: `${PUBLIC_SERVICE_ORIGIN}/pricing.json`,
@@ -362,7 +362,7 @@ function normalizeKeyPackUpgrade(offer) {
 
 function localPricing() {
   return {
-    service: "GPT55 GPT-5.6 Luna Standard x402 API Gateway",
+    service: "GPT55 Wallet and GPT-5.6 Luna Standard x402 API Gateway",
     repository: { ...PUBLIC_REPOSITORY },
     canonicalUrl: CANONICAL_SERVICE_HUB,
     startUrl: CANONICAL_SERVICE_HUB,
