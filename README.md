@@ -1,20 +1,25 @@
 # GPT55 x402 Gateway
 
-Buy one useful GPT-5.6 Luna Standard OpenAI-compatible response for **$0.00293
-USDC**. The primary paid route is
-`POST https://gpt55.558686.xyz/v1/chat/completions/standard`.
+Start with one **$0.001 USDC EVM Wallet Balance Snapshot** for a public Base or
+Ethereum address. The primary paid route is
+`GET https://gpt55.558686.xyz/v1/tools/evm-wallet-balance`.
+
+GPT-5.6 Luna Standard remains available as the model alternative at
+`POST https://gpt55.558686.xyz/v1/chat/completions/standard` for **$0.00293
+USDC**. The $11.1112 Key Pack remains the upgrade for repeated calls.
 
 Open the service hub and use **Pay with browser wallet** from an injected Base
 wallet. The wallet signs only the exact live USDC authorization; no private key
 is sent to the service. The quote-first buyer client in this repository remains
-the agent fallback. The $11.1112 Key Pack is the upgrade for repeated calls.
+the agent fallback.
 
 Canonical service entry:
 
 - Service hub: <https://gpt55.558686.xyz/x402/service>
 - Machine-readable catalog: <https://gpt55.558686.xyz/x402/service.json>
-- Main model route: `POST https://gpt55.558686.xyz/v1/chat/completions/standard`
-- Browser wallet checkout: <https://gpt55.558686.xyz/x402/service?checkout=standard-chat>
+- Wallet route: `GET https://gpt55.558686.xyz/v1/tools/evm-wallet-balance`
+- Wallet checkout: <https://gpt55.558686.xyz/x402/service?checkout=evm-wallet-balance>
+- Standard alternative: <https://gpt55.558686.xyz/x402/service?checkout=standard-chat>
 - Key Pack upgrade: <https://x402-key.558686.xyz/x402/checkout>
 - MCP endpoint: <https://gpt55.558686.xyz/mcp>
 
@@ -23,9 +28,9 @@ verification sequence, see [docs/demand-first-checkout.md](docs/demand-first-che
 
 ## Agent Fallback
 
-The buyer client is quote-only by default. Its local policy pins the exact URL,
+The buyer client is quote-only by default. Its local policies pin the exact URL,
 HTTP method, amount, Base network, canonical Base USDC contract, and merchant
-address for the main model route. Remote catalogs are discovery metadata only.
+address for both Wallet and Standard. Remote catalogs are discovery metadata only.
 The client does not sign or pay unless the operator explicitly sets
 `PAY_REAL_X402=1` and provides a wallet key in the operator-controlled process.
 
@@ -38,8 +43,11 @@ credential into a website, chat, issue, log, or remote service.
 git clone https://github.com/wangletiand/gpt55-x402-gateway.git
 cd gpt55-x402-gateway
 npm install
-ROUTE_ID=main-model-standard MAX_USDC=0.003 npm run first-payment:quote
+EVM_ADDRESS=0x1111111111111111111111111111111111111111 EVM_NETWORK=base MAX_USDC=0.001 npm run first-payment:quote
 ```
+
+Standard remains selectable with
+`ROUTE_ID=main-model-standard MAX_USDC=0.003 npm run first-payment:quote`.
 
 The command remains quote-only unless real payment is explicitly enabled.
 Generated evidence files and `.env` files are ignored by Git.
