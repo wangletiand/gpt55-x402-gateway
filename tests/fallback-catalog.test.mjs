@@ -11,7 +11,8 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const canonicalHub = 'https://gpt55.558686.xyz/x402/service';
 const repositoryUrl = 'https://github.com/wangletiand/gpt55-x402-gateway';
 const repositoryGitUrl = `${repositoryUrl}.git`;
-const primaryPaidUrl = 'https://gpt55.558686.xyz/v1/chat/completions/standard';
+const primaryPaidUrl = 'https://gpt55.558686.xyz/v1/tools/evm-wallet-balance';
+const standardPaidUrl = 'https://gpt55.558686.xyz/v1/chat/completions/standard';
 const keyPackPaidUrl = 'https://x402-key.558686.xyz/v1/paid/api-codex-key-pack-100';
 
 test('wrapper serves the current minimal catalog when the upstream is unavailable', async () => {
@@ -37,16 +38,19 @@ test('wrapper serves the current minimal catalog when the upstream is unavailabl
     ]);
 
     assertCanonicalEntry(guide);
-    assert.equal(guide.primaryCommercialOffer.routeId, 'standard-chat');
+    assert.equal(guide.primaryCommercialOffer.routeId, 'evm-wallet-balance');
     assert.equal(guide.primaryCommercialOffer.paidUrl, primaryPaidUrl);
-    assert.equal(guide.primaryCommercialOffer.price, '$0.00293');
-    assert.equal(guide.primaryCommercialOffer.amountAtomic, '2930');
+    assert.equal(guide.primaryCommercialOffer.price, '$0.001');
+    assert.equal(guide.primaryCommercialOffer.amountAtomic, '1000');
+    assert.equal(guide.standardChatAlternative.routeId, 'standard-chat');
+    assert.equal(guide.standardChatAlternative.paidUrl, standardPaidUrl);
     assert.equal(guide.keyPackUpgradeOffer.routeId, 'api-codex-key-pack-100');
 
     assertCanonicalEntry(pricing);
     assert.deepEqual(
       pricing.endpoints.map(({ id, path, price, amountAtomic }) => ({ id, path, price, amountAtomic })),
       [
+        { id: 'evm-wallet-balance', path: '/v1/tools/evm-wallet-balance', price: '$0.001', amountAtomic: '1000' },
         { id: 'main-model-standard', path: '/v1/chat/completions/standard', price: '$0.00293', amountAtomic: '2930' },
         { id: 'api-codex-key-pack-100', path: '/v1/paid/api-codex-key-pack-100', price: '$11.1112', amountAtomic: '11111200' },
         { id: 'x402-ping', path: '/v1/x402-ping', price: '$0.002', amountAtomic: '2000' },
@@ -89,6 +93,7 @@ test('wrapper replaces stale Key Pack primaries in successful remote catalogs', 
     recommendedFirstPurchase: { ...staleKeyPackPrimary },
     buyerPaths: [
       { ...staleKeyPackPrimary, id: 'api-codex-key-pack-100' },
+      { id: 'remote-standard', routeId: 'standard-chat', paidUrl: 'https://legacy.invalid/standard' },
       { id: 'remote-secondary', routeId: 'remote-secondary', paidUrl: 'https://legacy.invalid/secondary' },
     ],
     primaryRouteId: staleKeyPackPrimary.routeId,
@@ -136,14 +141,19 @@ test('wrapper replaces stale Key Pack primaries in successful remote catalogs', 
       assert.equal(catalog.buyUrl, canonicalHub);
       assert.equal(catalog.service, remoteCatalog.service);
       assert.deepEqual(catalog.endpoints, remoteCatalog.endpoints);
-      assert.equal(catalog.primaryCommercialOffer.routeId, 'standard-chat');
-      assert.equal(catalog.firstPurchase.routeId, 'standard-chat');
-      assert.equal(catalog.recommendedFirstPurchase.routeId, 'standard-chat');
-      assert.equal(catalog.buyerPaths[0].routeId, 'standard-chat');
+      assert.equal(catalog.primaryCommercialOffer.routeId, 'evm-wallet-balance');
+      assert.equal(catalog.firstPurchase.routeId, 'evm-wallet-balance');
+      assert.equal(catalog.recommendedFirstPurchase.routeId, 'evm-wallet-balance');
+      assert.equal(catalog.buyerPaths[0].routeId, 'evm-wallet-balance');
+      assert.equal(catalog.buyerPaths[1].routeId, 'standard-chat');
+      assert.equal(catalog.buyerPaths[1].paidUrl, standardPaidUrl);
+      assert.equal(catalog.buyerPaths.filter(({ routeId }) => routeId === 'evm-wallet-balance').length, 1);
       assert.equal(catalog.buyerPaths.filter(({ routeId }) => routeId === 'standard-chat').length, 1);
       assert.equal(catalog.buyerPaths.find(({ routeId }) => routeId === 'remote-secondary')?.paidUrl, 'https://legacy.invalid/secondary');
-      assert.equal(catalog.primaryRouteId, 'standard-chat');
+      assert.equal(catalog.primaryRouteId, 'evm-wallet-balance');
       assert.equal(catalog.primaryPaidUrl, primaryPaidUrl);
+      assert.equal(catalog.standardChatAlternative.routeId, 'standard-chat');
+      assert.equal(catalog.standardChatAlternative.paidUrl, standardPaidUrl);
       assert.equal(catalog.keyPackUpgradeOffer.routeId, 'api-codex-key-pack-100');
       assert.equal(catalog.keyPackUpgradeOffer.remoteExtension, 'preserved-upgrade-extension');
       assert.equal(catalog.keyPackUpgradeOffer.deliveryTrial.remoteTrialExtension, 'preserved-trial-extension');

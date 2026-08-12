@@ -47,7 +47,7 @@ const KEY_PACK_UPGRADE_OFFER = Object.freeze({
   quotaUsd: 100,
   deliveryTrial: KEY_PACK_DELIVERY_TRIAL,
 });
-const PRIMARY_COMMERCIAL_OFFER = Object.freeze({
+const STANDARD_CHAT_ALTERNATIVE = Object.freeze({
   id: "standard-chat-demand-first",
   routeId: "standard-chat",
   title: "GPT-5.6 Luna Standard one-request result",
@@ -68,6 +68,31 @@ const PRIMARY_COMMERCIAL_OFFER = Object.freeze({
     quoteOnlyCommand: "ROUTE_ID=standard MAX_USDC=0.00293 node first-payment-client.mjs",
     privateKeySentToService: false,
   }),
+  nextPurchase: KEY_PACK_UPGRADE_OFFER,
+});
+const PRIMARY_COMMERCIAL_OFFER = Object.freeze({
+  id: "evm-wallet-balance-demand-first",
+  routeId: "evm-wallet-balance",
+  title: "EVM Wallet Balance Snapshot",
+  method: "GET",
+  paidUrl: `${PUBLIC_SERVICE_ORIGIN}/v1/tools/evm-wallet-balance`,
+  quoteOnlyUrl: `${PUBLIC_SERVICE_ORIGIN}/v1/tools/evm-wallet-balance?address=0x1111111111111111111111111111111111111111&network=base`,
+  checkoutUrl: `${CANONICAL_SERVICE_HUB}?checkout=evm-wallet-balance`,
+  price: "$0.001",
+  amountAtomic: "1000",
+  browserCheckout: Object.freeze({
+    available: true,
+    url: `${CANONICAL_SERVICE_HUB}?checkout=evm-wallet-balance`,
+    bundleUrl: `${PUBLIC_SERVICE_ORIGIN}/x402/browser-wallet-payment.js`,
+    privateKeySentToService: false,
+  }),
+  agentFallback: Object.freeze({
+    routeId: "evm-wallet-balance",
+    firstPaymentClient: `${PUBLIC_SERVICE_ORIGIN}/x402/first-payment-client.mjs`,
+    quoteOnlyCommand: "ROUTE_ID=evm-wallet-balance EVM_ADDRESS=0x1111111111111111111111111111111111111111 EVM_NETWORK=base MAX_USDC=0.001 node first-payment-client.mjs",
+    privateKeySentToService: false,
+  }),
+  standardChatAlternative: STANDARD_CHAT_ALTERNATIVE,
   nextPurchase: KEY_PACK_UPGRADE_OFFER,
 });
 const REMOTE_BASE_URL = process.env.REMOTE_BASE_URL || "https://gpt55.558686.xyz";
@@ -263,13 +288,14 @@ function localBuyerGuide() {
     demandFirstOffer: { ...PRIMARY_COMMERCIAL_OFFER },
     firstPurchase: { ...PRIMARY_COMMERCIAL_OFFER },
     recommendedFirstPurchase: { ...PRIMARY_COMMERCIAL_OFFER },
+    standardChatAlternative: { ...STANDARD_CHAT_ALTERNATIVE },
     nextPurchase: { ...KEY_PACK_UPGRADE_OFFER },
     keyPackUpgradeOffer: { ...KEY_PACK_UPGRADE_OFFER },
     quickstart: {
       lowestCostProofUrl: `${PUBLIC_SERVICE_ORIGIN}/v1/x402-ping`,
       recommendedFirstRouteId: PRIMARY_COMMERCIAL_OFFER.routeId,
       recommendedFirstPaidUrl: PRIMARY_COMMERCIAL_OFFER.paidUrl,
-      spendCapUsd: 0.003,
+    spendCapUsd: 0.003,
     },
     livePrices: {
       pricing: `${PUBLIC_SERVICE_ORIGIN}/pricing.json`,
@@ -303,6 +329,7 @@ function normalizeBuyerGuideForWrapper(guide) {
   normalized.demandFirstOffer = { ...PRIMARY_COMMERCIAL_OFFER };
   normalized.firstPurchase = { ...PRIMARY_COMMERCIAL_OFFER };
   normalized.recommendedFirstPurchase = { ...PRIMARY_COMMERCIAL_OFFER };
+  normalized.standardChatAlternative = { ...STANDARD_CHAT_ALTERNATIVE };
   normalized.nextPurchase = normalizeKeyPackUpgrade(normalized.nextPurchase);
   normalized.keyPackUpgradeOffer = normalizeKeyPackUpgrade(normalized.keyPackUpgradeOffer);
   normalized.buyerPaths = normalizePrimaryBuyerPaths(normalized.buyerPaths);
@@ -313,9 +340,12 @@ function normalizeBuyerGuideForWrapper(guide) {
 
 function normalizePrimaryBuyerPaths(buyerPaths) {
   const preserved = Array.isArray(buyerPaths)
-    ? buyerPaths.filter((path) => path?.routeId !== PRIMARY_COMMERCIAL_OFFER.routeId)
+    ? buyerPaths.filter((path) => (
+      path?.routeId !== PRIMARY_COMMERCIAL_OFFER.routeId
+      && path?.routeId !== STANDARD_CHAT_ALTERNATIVE.routeId
+    ))
     : [];
-  return [{ ...PRIMARY_COMMERCIAL_OFFER }, ...preserved];
+  return [{ ...PRIMARY_COMMERCIAL_OFFER }, { ...STANDARD_CHAT_ALTERNATIVE }, ...preserved];
 }
 
 function normalizeKeyPackUpgrade(offer) {
@@ -351,10 +381,12 @@ function localPricing() {
     demandFirstOffer: { ...PRIMARY_COMMERCIAL_OFFER },
     firstPurchase: { ...PRIMARY_COMMERCIAL_OFFER },
     recommendedFirstPurchase: { ...PRIMARY_COMMERCIAL_OFFER },
+    standardChatAlternative: { ...STANDARD_CHAT_ALTERNATIVE },
     nextPurchase: { ...KEY_PACK_UPGRADE_OFFER },
     keyPackUpgradeOffer: { ...KEY_PACK_UPGRADE_OFFER },
     endpoints: [
-      { id: "main-model-standard", method: "POST", path: "/v1/chat/completions/standard", url: PRIMARY_COMMERCIAL_OFFER.paidUrl, price: PRIMARY_COMMERCIAL_OFFER.price, amountAtomic: PRIMARY_COMMERCIAL_OFFER.amountAtomic },
+      { id: "evm-wallet-balance", method: "GET", path: "/v1/tools/evm-wallet-balance", url: PRIMARY_COMMERCIAL_OFFER.paidUrl, price: PRIMARY_COMMERCIAL_OFFER.price, amountAtomic: PRIMARY_COMMERCIAL_OFFER.amountAtomic },
+      { id: "main-model-standard", method: "POST", path: "/v1/chat/completions/standard", url: STANDARD_CHAT_ALTERNATIVE.paidUrl, price: STANDARD_CHAT_ALTERNATIVE.price, amountAtomic: STANDARD_CHAT_ALTERNATIVE.amountAtomic },
       { id: "api-codex-key-pack-100", method: "GET", path: "/v1/paid/api-codex-key-pack-100", url: KEY_PACK_UPGRADE_OFFER.paidUrl, price: KEY_PACK_UPGRADE_OFFER.price, amountAtomic: KEY_PACK_UPGRADE_OFFER.amountAtomic },
       { id: "x402-ping", method: "GET or POST", path: "/v1/x402-ping", url: `${PUBLIC_SERVICE_ORIGIN}/v1/x402-ping`, price: "$0.002", amountAtomic: "2000" },
       { id: "gpt-5.5", method: "POST", path: "/v1/chat/completions/gpt-5.5", url: `${PUBLIC_SERVICE_ORIGIN}/v1/chat/completions/gpt-5.5`, price: "$0.019999", amountAtomic: "19999" },
@@ -376,6 +408,7 @@ function normalizePricingForWrapper(pricing) {
   normalized.demandFirstOffer = { ...PRIMARY_COMMERCIAL_OFFER };
   normalized.firstPurchase = { ...PRIMARY_COMMERCIAL_OFFER };
   normalized.recommendedFirstPurchase = { ...PRIMARY_COMMERCIAL_OFFER };
+  normalized.standardChatAlternative = { ...STANDARD_CHAT_ALTERNATIVE };
   normalized.nextPurchase = normalizeKeyPackUpgrade(normalized.nextPurchase);
   normalized.keyPackUpgradeOffer = normalizeKeyPackUpgrade(normalized.keyPackUpgradeOffer);
   normalized.buyerPaths = normalizePrimaryBuyerPaths(normalized.buyerPaths);

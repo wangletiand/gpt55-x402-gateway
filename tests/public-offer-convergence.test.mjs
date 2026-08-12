@@ -9,6 +9,13 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const hub = 'https://gpt55.558686.xyz/x402/service';
 const expected = {
+  routeId: 'evm-wallet-balance',
+  method: 'GET',
+  paidUrl: 'https://gpt55.558686.xyz/v1/tools/evm-wallet-balance',
+  price: '$0.001',
+  amountAtomic: '1000',
+};
+const expectedStandard = {
   routeId: 'standard-chat',
   method: 'POST',
   paidUrl: 'https://gpt55.558686.xyz/v1/chat/completions/standard',
@@ -16,7 +23,7 @@ const expected = {
   amountAtomic: '2930',
 };
 
-test('checked-in public artifacts converge on the Standard first purchase', async () => {
+test('checked-in public artifacts converge on Wallet first with Standard preserved', async () => {
   const [serverJson, readme, page] = await Promise.all([
     readJson('server.json'),
     fs.readFile(new URL('../README.md', import.meta.url), 'utf8'),
@@ -29,6 +36,10 @@ test('checked-in public artifacts converge on the Standard first purchase', asyn
   assertPrimary(serverJson.buyerPaths?.[0], 'server buyerPaths[0]');
   assert.equal(serverJson.primaryRouteId, expected.routeId);
   assert.equal(serverJson.primaryPaidUrl, expected.paidUrl);
+  assertStandard(serverJson.standardChatAlternative, 'server Standard alternative');
+  assertStandard(serverJson.buyerPaths?.[1], 'server buyerPaths[1]');
+  assert.equal(serverJson.buyerPaths.filter(({ routeId }) => routeId === expected.routeId).length, 1);
+  assert.equal(serverJson.buyerPaths.filter(({ routeId }) => routeId === expectedStandard.routeId).length, 1);
   assert.equal(serverJson.nextPurchase?.routeId, 'api-codex-key-pack-100');
   assert.equal(serverJson.keyPackUpgradeOffer?.routeId, 'api-codex-key-pack-100');
   assertKeyPackUpgrade(serverJson.keyPackUpgradeOffer, 'server Key Pack upgrade');
@@ -43,7 +54,7 @@ test('checked-in public artifacts converge on the Standard first purchase', asyn
   }
 });
 
-test('wrapper fallback metadata converges on the Standard first purchase', async () => {
+test('wrapper fallback metadata converges on Wallet first with Standard preserved', async () => {
   const port = await reservePort();
   const child = spawn(process.execPath, ['server.mjs'], {
     cwd: root,
@@ -60,6 +71,8 @@ test('wrapper fallback metadata converges on the Standard first purchase', async
       assertPrimary(document.primaryCommercialOffer, `${pathname} primary`);
       assertPrimary(document.firstPurchase, `${pathname} first`);
       assertPrimary(document.recommendedFirstPurchase, `${pathname} recommended`);
+      assertStandard(document.standardChatAlternative, `${pathname} Standard alternative`);
+      assertStandard(document.buyerPaths?.[1], `${pathname} buyerPaths[1]`);
       assert.equal(document.nextPurchase?.routeId, 'api-codex-key-pack-100');
       assert.equal(document.keyPackUpgradeOffer?.routeId, 'api-codex-key-pack-100');
       assertKeyPackUpgrade(document.keyPackUpgradeOffer, `${pathname} Key Pack upgrade`);
@@ -76,6 +89,12 @@ function assertPrimary(offer, label) {
   for (const [field, value] of Object.entries(expected)) assert.equal(offer[field], value, `${label}.${field}`);
   assert.equal(offer.browserCheckout?.available, true, `${label} browser checkout`);
   assert.match(offer.agentFallback?.firstPaymentClient || '', /\/x402\/first-payment-client\.mjs$/, `${label} agent fallback`);
+}
+
+function assertStandard(offer, label) {
+  assert.ok(offer, `${label} exists`);
+  for (const [field, value] of Object.entries(expectedStandard)) assert.equal(offer[field], value, `${label}.${field}`);
+  assert.equal(offer.browserCheckout?.available, true, `${label} browser checkout`);
 }
 
 function assertKeyPackUpgrade(offer, label) {
