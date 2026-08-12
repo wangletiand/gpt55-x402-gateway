@@ -1,7 +1,8 @@
 # x402 First Payment Client
 
-This buyer-owned client quotes the GPT55 main model route and can optionally
-perform one Base USDC x402 payment. It never sends a private key to the service.
+This buyer-owned client quotes either the `$0.001` EVM Wallet Balance Snapshot
+or the `$0.00293` GPT-5.6 Luna Standard route and can optionally perform one
+Base USDC x402 payment. It never sends a private key to the service.
 
 ## Quote-Only
 
@@ -9,6 +10,12 @@ From the repository root:
 
 ```bash
 npm install
+EVM_ADDRESS=0x1111111111111111111111111111111111111111 EVM_NETWORK=base MAX_USDC=0.001 npm run first-payment:quote
+```
+
+To quote Standard chat instead:
+
+```bash
 ROUTE_ID=main-model-standard MAX_USDC=0.003 npm run first-payment:quote
 ```
 
@@ -19,7 +26,14 @@ Quote-only is the default. A successful check reports:
 - `settled: false`
 - `decision.safeToPay: true` only when every locally pinned field matches
 
-The only supported payment policy is:
+The default Wallet policy is:
+
+- URL: `https://gpt55.558686.xyz/v1/tools/evm-wallet-balance?address=<EVM_ADDRESS>&network=<EVM_NETWORK>`
+- Inputs: a public 20-byte EVM address and `base` or `ethereum`
+- Method: `GET`
+- Amount: `1000` atomic USDC (`$0.001`)
+
+The retained Standard policy is:
 
 - URL: `https://gpt55.558686.xyz/v1/chat/completions/standard`
 - Method: `POST`
@@ -30,15 +44,20 @@ The only supported payment policy is:
 - Amount: `2930` atomic USDC (`$0.00293`)
 
 Remote catalogs are discovery metadata only and cannot change this policy.
-The client rejects non-finite or non-positive `MAX_USDC` values.
+The client rejects invalid Wallet addresses, unsupported lookup networks, and
+non-finite or non-positive `MAX_USDC` values. Both policies pin scheme, Base
+settlement network, canonical Base USDC, merchant, amount, method, and the full
+request URL before payment.
 
 ## Real Payment
 
 Real payment is explicit and must run in a buyer-controlled environment:
 
 ```bash
-PAY_REAL_X402=1 ROUTE_ID=main-model-standard MAX_USDC=0.003 EVM_PRIVATE_KEY=$EVM_PRIVATE_KEY npm run first-payment:quote
+PAY_REAL_X402=1 EVM_ADDRESS=0x1111111111111111111111111111111111111111 EVM_NETWORK=base MAX_USDC=0.001 EVM_PRIVATE_KEY=$EVM_PRIVATE_KEY npm run first-payment:quote
 ```
+
+For Standard, add `ROUTE_ID=main-model-standard` and use `MAX_USDC=0.003`.
 
 The process reports success only when all of these are present:
 

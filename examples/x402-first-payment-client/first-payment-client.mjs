@@ -16,8 +16,9 @@ import {
   getTrustedRoutePolicy,
 } from './trusted-payment-policy.mjs';
 
-const routeId = process.env.ROUTE_ID || 'main-model-standard';
-const maxUsdc = assertValidSpendCap(Number(process.env.MAX_USDC || '0.003'));
+const routeId = process.env.ROUTE_ID || 'evm-wallet-balance';
+const defaultMaxUsdc = routeId === 'evm-wallet-balance' ? '0.001' : '0.003';
+const maxUsdc = assertValidSpendCap(Number(process.env.MAX_USDC || defaultMaxUsdc));
 const payReal = process.env.PAY_REAL_X402 === '1';
 const privateKey = process.env.EVM_PRIVATE_KEY || '';
 const evidenceFile = process.env.EVIDENCE_FILE || path.join(
@@ -60,7 +61,10 @@ try {
 }
 
 async function run() {
-  const policy = getTrustedRoutePolicy(routeId);
+  const policy = getTrustedRoutePolicy(routeId, {
+    evmAddress: process.env.EVM_ADDRESS,
+    evmNetwork: process.env.EVM_NETWORK || 'base',
+  });
   context.paidUrl = policy.paidUrl;
   context.buyerPolicy = buyerPolicySummary(policy);
 
@@ -199,6 +203,12 @@ async function fetchQuote(policy) {
 }
 
 function paidRequest(policy) {
+  if (policy.method === 'GET') {
+    return {
+      url: policy.paidUrl,
+      options: { method: 'GET' },
+    };
+  }
   return {
     url: policy.paidUrl,
     options: {
@@ -271,8 +281,12 @@ function buildBuyerPaymentReadiness(decision) {
     buyerWalletPresent: Boolean(privateKey),
     privateKeySentToService: false,
     missingForRealPayment,
-    quoteOnlyCommand: 'ROUTE_ID=main-model-standard MAX_USDC=0.003 npm run first-payment:quote',
-    realPaymentCommand: 'PAY_REAL_X402=1 ROUTE_ID=main-model-standard MAX_USDC=0.003 EVM_PRIVATE_KEY=$EVM_PRIVATE_KEY npm run first-payment:quote',
+    quoteOnlyCommand: routeId === 'evm-wallet-balance'
+      ? 'EVM_ADDRESS=0x... EVM_NETWORK=base MAX_USDC=0.001 npm run first-payment:quote'
+      : 'ROUTE_ID=main-model-standard MAX_USDC=0.003 npm run first-payment:quote',
+    realPaymentCommand: routeId === 'evm-wallet-balance'
+      ? 'PAY_REAL_X402=1 EVM_ADDRESS=0x... EVM_NETWORK=base MAX_USDC=0.001 EVM_PRIVATE_KEY=$EVM_PRIVATE_KEY npm run first-payment:quote'
+      : 'PAY_REAL_X402=1 ROUTE_ID=main-model-standard MAX_USDC=0.003 EVM_PRIVATE_KEY=$EVM_PRIVATE_KEY npm run first-payment:quote',
   };
 }
 

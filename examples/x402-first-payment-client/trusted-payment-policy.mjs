@@ -1,4 +1,10 @@
 const BASE_USDC_DECIMALS = 6;
+const BASE_USDC_ASSET = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+const MERCHANT = '0x1f0130669ca6fd02e025a984cc038f139df19a2f';
+const WALLET_BALANCE_ROUTE_ID = 'evm-wallet-balance';
+const WALLET_BALANCE_ORIGIN = 'https://gpt55.558686.xyz';
+const WALLET_BALANCE_PATH = '/v1/tools/evm-wallet-balance';
+const WALLET_LOOKUP_NETWORKS = new Set(['base', 'ethereum']);
 
 export const TRUSTED_ROUTE_POLICIES = Object.freeze({
   'main-model-standard': Object.freeze({
@@ -7,18 +13,44 @@ export const TRUSTED_ROUTE_POLICIES = Object.freeze({
     method: 'POST',
     scheme: 'exact',
     network: 'eip155:8453',
-    asset: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
-    payTo: '0x1f0130669ca6fd02e025a984cc038f139df19a2f',
+    asset: BASE_USDC_ASSET,
+    payTo: MERCHANT,
     amountAtomic: '2930',
   }),
 });
 
-export function getTrustedRoutePolicy(routeId) {
+export function getTrustedRoutePolicy(routeId, inputs = {}) {
+  if (routeId === WALLET_BALANCE_ROUTE_ID) {
+    return walletBalancePolicy(inputs);
+  }
   const policy = TRUSTED_ROUTE_POLICIES[routeId];
   if (!policy) {
-    throw new Error(`Unsupported ROUTE_ID=${routeId}. Supported routes: ${Object.keys(TRUSTED_ROUTE_POLICIES).join(', ')}`);
+    const supported = [WALLET_BALANCE_ROUTE_ID, ...Object.keys(TRUSTED_ROUTE_POLICIES)];
+    throw new Error(`Unsupported ROUTE_ID=${routeId}. Supported routes: ${supported.join(', ')}`);
   }
   return policy;
+}
+
+function walletBalancePolicy({ evmAddress, evmNetwork } = {}) {
+  if (!/^0x[0-9a-fA-F]{40}$/.test(String(evmAddress || ''))) {
+    throw new Error('EVM_ADDRESS must be a public 0x-prefixed 20-byte EVM address.');
+  }
+  if (!WALLET_LOOKUP_NETWORKS.has(evmNetwork)) {
+    throw new Error('EVM_NETWORK must be base or ethereum.');
+  }
+  const paidUrl = new URL(WALLET_BALANCE_PATH, WALLET_BALANCE_ORIGIN);
+  paidUrl.searchParams.set('address', evmAddress);
+  paidUrl.searchParams.set('network', evmNetwork);
+  return Object.freeze({
+    id: WALLET_BALANCE_ROUTE_ID,
+    paidUrl: paidUrl.href,
+    method: 'GET',
+    scheme: 'exact',
+    network: 'eip155:8453',
+    asset: BASE_USDC_ASSET,
+    payTo: MERCHANT,
+    amountAtomic: '1000',
+  });
 }
 
 export function assertValidSpendCap(maxUsdc) {

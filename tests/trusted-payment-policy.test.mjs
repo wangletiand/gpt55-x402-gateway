@@ -13,6 +13,7 @@ import {
   assertSettledPayment,
   assertValidSpendCap,
   evaluateTrustedQuote,
+  getTrustedRoutePolicy,
   selectTrustedRequirement,
 } from '../examples/x402-first-payment-client/trusted-payment-policy.mjs';
 import {
@@ -23,6 +24,7 @@ import {
 } from '../examples/x402-first-payment-client/http-safety.mjs';
 
 const policy = TRUSTED_ROUTE_POLICIES['main-model-standard'];
+const walletAddress = '0x1111111111111111111111111111111111111111';
 
 function validQuote(overrides = {}) {
   return {
@@ -117,6 +119,7 @@ function runFirstPaymentClient(preloadSource) {
       encoding: 'utf8',
       env: {
         ...process.env,
+        ROUTE_ID: 'main-model-standard',
         PAY_REAL_X402: '1',
         EVM_PRIVATE_KEY: `0x${'1'.repeat(64)}`,
         EVIDENCE_FILE: '0',
@@ -125,6 +128,65 @@ function runFirstPaymentClient(preloadSource) {
     },
   );
 }
+
+test('first payment client defaults to the Wallet quote with no payment', () => {
+  const walletPolicy = getTrustedRoutePolicy('evm-wallet-balance', {
+    evmAddress: walletAddress,
+    evmNetwork: 'base',
+  });
+  const responseBody = JSON.stringify({
+    x402Version: 2,
+    resource: { url: walletPolicy.paidUrl },
+    accepts: [{
+      scheme: walletPolicy.scheme,
+      network: walletPolicy.network,
+      asset: walletPolicy.asset,
+      payTo: walletPolicy.payTo,
+      amount: walletPolicy.amountAtomic,
+    }],
+  });
+  const preloadSource = `
+    globalThis.fetch = async (input, init) => {
+      const request = new Request(input, init);
+      if (request.url !== ${JSON.stringify(walletPolicy.paidUrl)}) throw new Error('Unexpected Wallet URL: ' + request.url);
+      if (request.method !== 'GET') throw new Error('Unexpected Wallet method: ' + request.method);
+      return new Response(${JSON.stringify(responseBody)}, {
+        status: 402,
+        headers: { 'content-type': 'application/json' },
+      });
+    };
+  `;
+  const result = spawnSync(
+    process.execPath,
+    [
+      '--import',
+      `data:text/javascript,${encodeURIComponent(preloadSource)}`,
+      fileURLToPath(new URL('../examples/x402-first-payment-client/first-payment-client.mjs', import.meta.url)),
+    ],
+    {
+      cwd: fileURLToPath(new URL('..', import.meta.url)),
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        ROUTE_ID: '',
+        EVM_ADDRESS: walletAddress,
+        EVM_NETWORK: 'base',
+        MAX_USDC: '',
+        PAY_REAL_X402: '0',
+        EVIDENCE_FILE: '0',
+        X402_FETCH_RETRIES: '1',
+      },
+    },
+  );
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const evidence = JSON.parse(result.stdout);
+  assert.equal(evidence.routeId, 'evm-wallet-balance');
+  assert.equal(evidence.paidUrl, walletPolicy.paidUrl);
+  assert.equal(evidence.maxUsdc, 0.001);
+  assert.equal(evidence.decision.safeToPay, true);
+  assert.equal(evidence.paymentSent, false);
+});
 
 function assertPrePaymentFailure(result, errorPattern) {
   assert.equal(result.status, 1, result.stderr);
@@ -146,6 +208,57 @@ test('main model policy pins the complete Base USDC payment identity', () => {
     payTo: '0x1f0130669ca6fd02e025a984cc038f139df19a2f',
     amountAtomic: '2930',
   });
+});
+
+test('wallet policy builds a fully pinned request from validated public inputs', () => {
+  assert.deepEqual(getTrustedRoutePolicy('evm-wallet-balance', {
+    evmAddress: walletAddress,
+    evmNetwork: 'base',
+  }), {
+    id: 'evm-wallet-balance',
+    paidUrl: `https://gpt55.558686.xyz/v1/tools/evm-wallet-balance?address=${walletAddress}&network=base`,
+    method: 'GET',
+    scheme: 'exact',
+    network: 'eip155:8453',
+    asset: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+    payTo: '0x1f0130669ca6fd02e025a984cc038f139df19a2f',
+    amountAtomic: '1000',
+  });
+  assert.deepEqual(getTrustedRoutePolicy('main-model-standard'), policy);
+});
+
+test('wallet policy rejects an invalid address or unsupported lookup network', () => {
+  assert.throws(
+    () => getTrustedRoutePolicy('evm-wallet-balance', { evmAddress: 'not-an-address', evmNetwork: 'base' }),
+    /EVM_ADDRESS/i,
+  );
+  assert.throws(
+    () => getTrustedRoutePolicy('evm-wallet-balance', { evmAddress: walletAddress, evmNetwork: 'polygon' }),
+    /EVM_NETWORK/i,
+  );
+});
+
+test('wallet quote validation pins the complete address and network query', () => {
+  const walletPolicy = getTrustedRoutePolicy('evm-wallet-balance', {
+    evmAddress: walletAddress,
+    evmNetwork: 'ethereum',
+  });
+  const walletQuote = {
+    status: 402,
+    requestedUrl: walletPolicy.paidUrl,
+    quotedResourceUrl: walletPolicy.paidUrl,
+    requestedMethod: walletPolicy.method,
+    scheme: walletPolicy.scheme,
+    network: walletPolicy.network,
+    asset: walletPolicy.asset,
+    payTo: walletPolicy.payTo,
+    amountAtomic: walletPolicy.amountAtomic,
+  };
+  assert.equal(evaluateTrustedQuote(walletQuote, walletPolicy, 0.001).safeToPay, true);
+  assert.equal(evaluateTrustedQuote({
+    ...walletQuote,
+    quotedResourceUrl: `${walletPolicy.paidUrl}&unexpected=1`,
+  }, walletPolicy, 0.001).safeToPay, false);
 });
 
 test('quote validation accepts only an exact match to the local policy', () => {
@@ -227,6 +340,7 @@ test('invalid private key fails before a payment attempt starts', () => {
       encoding: 'utf8',
       env: {
         ...process.env,
+        ROUTE_ID: 'main-model-standard',
         PAY_REAL_X402: '1',
         EVM_PRIVATE_KEY: 'invalid-local-private-key',
         EVIDENCE_FILE: '0',
