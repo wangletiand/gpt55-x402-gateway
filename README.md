@@ -1,25 +1,21 @@
-# GPT55 x402 Gateway
+# GPT-5.6 Luna x402 API | GPT55 Gateway
 
-Start with one **$0.001 USDC EVM Wallet Balance Snapshot** for a public Base or
-Ethereum address. The primary paid route is
-`GET https://gpt55.558686.xyz/v1/tools/evm-wallet-balance`.
+GPT55 provides an OpenAI-compatible **GPT-5.6 Luna Standard** result over
+x402 for **$0.00293 USDC on Base**. Buyers can pay one request from a browser
+wallet without handing over a private key, or use the quote-first agent
+fallback client when a wallet UI is unavailable. The $11.1112 Key Pack remains
+the upgrade for repeated calls.
 
-GPT-5.6 Luna Standard remains available as the model alternative at
-`POST https://gpt55.558686.xyz/v1/chat/completions/standard` for **$0.00293
-USDC**. The $11.1112 Key Pack remains the upgrade for repeated calls.
-
-Open the service hub and use **Pay with browser wallet** from an injected Base
-wallet. The wallet signs only the exact live USDC authorization; no private key
-is sent to the service. The quote-first buyer client in this repository remains
-the agent fallback.
+The EVM Wallet Balance Snapshot remains available as a separate utility
+alternative; it is not the model product.
 
 Canonical service entry:
 
 - Service hub: <https://gpt55.558686.xyz/x402/service>
 - Machine-readable catalog: <https://gpt55.558686.xyz/x402/service.json>
-- Wallet route: `GET https://gpt55.558686.xyz/v1/tools/evm-wallet-balance`
-- Wallet checkout: <https://gpt55.558686.xyz/x402/service?checkout=evm-wallet-balance>
-- Standard alternative: <https://gpt55.558686.xyz/x402/service?checkout=standard-chat>
+- Main model route: `POST https://gpt55.558686.xyz/v1/chat/completions/standard`
+- Browser checkout: <https://gpt55.558686.xyz/x402/service?checkout=standard-chat>
+- Wallet alternative: <https://gpt55.558686.xyz/x402/service?checkout=evm-wallet-balance>
 - Key Pack upgrade: <https://x402-key.558686.xyz/x402/checkout>
 - MCP endpoint: <https://gpt55.558686.xyz/mcp>
 
@@ -43,14 +39,17 @@ credential into a website, chat, issue, log, or remote service.
 git clone https://github.com/wangletiand/gpt55-x402-gateway.git
 cd gpt55-x402-gateway
 npm install
-EVM_ADDRESS=0x1111111111111111111111111111111111111111 EVM_NETWORK=base MAX_USDC=0.001 npm run first-payment:quote
+ROUTE_ID=standard MAX_USDC=0.00293 npm run first-payment:quote
 ```
-
-Standard remains selectable with
-`ROUTE_ID=main-model-standard MAX_USDC=0.003 npm run first-payment:quote`.
 
 The command remains quote-only unless real payment is explicitly enabled.
 Generated evidence files and `.env` files are ignored by Git.
+
+The live quote is authoritative immediately before any payment. For an
+OpenAI-compatible request, send the same JSON body to
+`/v1/chat/completions/standard` after the x402 client returns a valid paid
+retry. The public service hub includes the browser-wallet flow and a link to
+the agent fallback client.
 
 ## Local MCP Wrapper
 

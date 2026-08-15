@@ -70,7 +70,7 @@ const STANDARD_CHAT_ALTERNATIVE = Object.freeze({
   }),
   nextPurchase: KEY_PACK_UPGRADE_OFFER,
 });
-const PRIMARY_COMMERCIAL_OFFER = Object.freeze({
+const WALLET_BALANCE_ALTERNATIVE = Object.freeze({
   id: "evm-wallet-balance-demand-first",
   routeId: "evm-wallet-balance",
   title: "EVM Wallet Balance Snapshot",
@@ -95,6 +95,7 @@ const PRIMARY_COMMERCIAL_OFFER = Object.freeze({
   standardChatAlternative: STANDARD_CHAT_ALTERNATIVE,
   nextPurchase: KEY_PACK_UPGRADE_OFFER,
 });
+const PRIMARY_COMMERCIAL_OFFER = STANDARD_CHAT_ALTERNATIVE;
 const REMOTE_BASE_URL = process.env.REMOTE_BASE_URL || "https://gpt55.558686.xyz";
 const CANONICAL_MCP_URL = `${REMOTE_BASE_URL}/mcp`;
 const MAX_REQUEST_BODY_BYTES = 64 * 1024;
@@ -205,7 +206,7 @@ function localInitialize(id) {
     },
     serverInfo: {
       name: "gpt55-x402-gateway",
-      title: "GPT55 Wallet and GPT-5.6 Luna Standard x402 Gateway",
+      title: "GPT-5.6 Luna x402 API | GPT55 Gateway",
       version: "1.0.0",
     },
     instructions:
@@ -218,9 +219,9 @@ function localToolsList(id) {
     tools: [
       {
         name: "gpt55_gateway_directory",
-        title: "GPT55 Wallet and GPT-5.6 Luna Standard x402 Directory",
+        title: "GPT-5.6 Luna x402 API Directory",
         description:
-          "Returns public endpoint, pricing, x402 discovery, and buyer-guide links for the Wallet-first GPT55 x402 gateway and Standard alternative.",
+          "Returns public endpoint, pricing, x402 discovery, and buyer-guide links for the GPT-5.6 Luna Standard x402 API, with Wallet Balance as an alternative.",
         inputSchema: {
           type: "object",
           properties: {},
@@ -261,7 +262,7 @@ function localToolCall(id, params = {}) {
 function localBuyerGuide() {
   return {
     schemaVersion: "2026-08-06",
-    title: "GPT55 Wallet and GPT-5.6 Luna Standard x402 Buyer Guide",
+    title: "GPT-5.6 Luna x402 API Buyer Guide",
     repository: { ...PUBLIC_REPOSITORY },
     canonicalUrl: CANONICAL_SERVICE_HUB,
     startUrl: CANONICAL_SERVICE_HUB,
@@ -269,7 +270,7 @@ function localBuyerGuide() {
     buyUrl: CANONICAL_SERVICE_HUB,
     startApplyBuyUrl: CANONICAL_SERVICE_HUB,
     service: {
-      name: "GPT55 Wallet and GPT-5.6 Luna Standard x402 API Gateway",
+      name: "GPT-5.6 Luna OpenAI-compatible x402 API Gateway",
       baseUrl: PUBLIC_SERVICE_ORIGIN,
       openaiCompatible: true,
       accountRequired: false,
@@ -289,13 +290,14 @@ function localBuyerGuide() {
     firstPurchase: { ...PRIMARY_COMMERCIAL_OFFER },
     recommendedFirstPurchase: { ...PRIMARY_COMMERCIAL_OFFER },
     standardChatAlternative: { ...STANDARD_CHAT_ALTERNATIVE },
+    walletBalanceAlternative: { ...WALLET_BALANCE_ALTERNATIVE },
     nextPurchase: { ...KEY_PACK_UPGRADE_OFFER },
     keyPackUpgradeOffer: { ...KEY_PACK_UPGRADE_OFFER },
     quickstart: {
       lowestCostProofUrl: `${PUBLIC_SERVICE_ORIGIN}/v1/x402-ping`,
       recommendedFirstRouteId: PRIMARY_COMMERCIAL_OFFER.routeId,
       recommendedFirstPaidUrl: PRIMARY_COMMERCIAL_OFFER.paidUrl,
-      spendCapUsd: 0.001,
+      spendCapUsd: 0.00293,
     },
     livePrices: {
       pricing: `${PUBLIC_SERVICE_ORIGIN}/pricing.json`,
@@ -330,6 +332,7 @@ function normalizeBuyerGuideForWrapper(guide) {
   normalized.firstPurchase = { ...PRIMARY_COMMERCIAL_OFFER };
   normalized.recommendedFirstPurchase = { ...PRIMARY_COMMERCIAL_OFFER };
   normalized.standardChatAlternative = { ...STANDARD_CHAT_ALTERNATIVE };
+  normalized.walletBalanceAlternative = { ...WALLET_BALANCE_ALTERNATIVE };
   normalized.nextPurchase = normalizeKeyPackUpgrade(normalized.nextPurchase);
   normalized.keyPackUpgradeOffer = normalizeKeyPackUpgrade(normalized.keyPackUpgradeOffer);
   normalized.buyerPaths = normalizePrimaryBuyerPaths(normalized.buyerPaths);
@@ -342,10 +345,10 @@ function normalizePrimaryBuyerPaths(buyerPaths) {
   const preserved = Array.isArray(buyerPaths)
     ? buyerPaths.filter((path) => (
       path?.routeId !== PRIMARY_COMMERCIAL_OFFER.routeId
-      && path?.routeId !== STANDARD_CHAT_ALTERNATIVE.routeId
+      && path?.routeId !== WALLET_BALANCE_ALTERNATIVE.routeId
     ))
     : [];
-  return [{ ...PRIMARY_COMMERCIAL_OFFER }, { ...STANDARD_CHAT_ALTERNATIVE }, ...preserved];
+  return [{ ...PRIMARY_COMMERCIAL_OFFER }, { ...WALLET_BALANCE_ALTERNATIVE }, ...preserved];
 }
 
 function normalizeKeyPackUpgrade(offer) {
@@ -362,7 +365,7 @@ function normalizeKeyPackUpgrade(offer) {
 
 function localPricing() {
   return {
-    service: "GPT55 Wallet and GPT-5.6 Luna Standard x402 API Gateway",
+    service: "GPT-5.6 Luna OpenAI-compatible x402 API Gateway",
     repository: { ...PUBLIC_REPOSITORY },
     canonicalUrl: CANONICAL_SERVICE_HUB,
     startUrl: CANONICAL_SERVICE_HUB,
@@ -382,11 +385,12 @@ function localPricing() {
     firstPurchase: { ...PRIMARY_COMMERCIAL_OFFER },
     recommendedFirstPurchase: { ...PRIMARY_COMMERCIAL_OFFER },
     standardChatAlternative: { ...STANDARD_CHAT_ALTERNATIVE },
+    walletBalanceAlternative: { ...WALLET_BALANCE_ALTERNATIVE },
     nextPurchase: { ...KEY_PACK_UPGRADE_OFFER },
     keyPackUpgradeOffer: { ...KEY_PACK_UPGRADE_OFFER },
     endpoints: [
-      { id: "evm-wallet-balance", method: "GET", path: "/v1/tools/evm-wallet-balance", url: PRIMARY_COMMERCIAL_OFFER.paidUrl, price: PRIMARY_COMMERCIAL_OFFER.price, amountAtomic: PRIMARY_COMMERCIAL_OFFER.amountAtomic },
-      { id: "main-model-standard", method: "POST", path: "/v1/chat/completions/standard", url: STANDARD_CHAT_ALTERNATIVE.paidUrl, price: STANDARD_CHAT_ALTERNATIVE.price, amountAtomic: STANDARD_CHAT_ALTERNATIVE.amountAtomic },
+      { id: "main-model-standard", method: "POST", path: "/v1/chat/completions/standard", url: PRIMARY_COMMERCIAL_OFFER.paidUrl, price: PRIMARY_COMMERCIAL_OFFER.price, amountAtomic: PRIMARY_COMMERCIAL_OFFER.amountAtomic },
+      { id: "evm-wallet-balance", method: "GET", path: "/v1/tools/evm-wallet-balance", url: WALLET_BALANCE_ALTERNATIVE.paidUrl, price: WALLET_BALANCE_ALTERNATIVE.price, amountAtomic: WALLET_BALANCE_ALTERNATIVE.amountAtomic },
       { id: "api-codex-key-pack-100", method: "GET", path: "/v1/paid/api-codex-key-pack-100", url: KEY_PACK_UPGRADE_OFFER.paidUrl, price: KEY_PACK_UPGRADE_OFFER.price, amountAtomic: KEY_PACK_UPGRADE_OFFER.amountAtomic },
       { id: "x402-ping", method: "GET or POST", path: "/v1/x402-ping", url: `${PUBLIC_SERVICE_ORIGIN}/v1/x402-ping`, price: "$0.002", amountAtomic: "2000" },
       { id: "gpt-5.5", method: "POST", path: "/v1/chat/completions/gpt-5.5", url: `${PUBLIC_SERVICE_ORIGIN}/v1/chat/completions/gpt-5.5`, price: "$0.019999", amountAtomic: "19999" },

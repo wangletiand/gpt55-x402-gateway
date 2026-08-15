@@ -4,8 +4,8 @@ import fs from 'node:fs/promises';
 const root = new URL('..', import.meta.url);
 const guide = await fs.readFile(new URL('./docs/demand-first-checkout.md', root), 'utf8');
 const server = JSON.parse(await fs.readFile(new URL('./server.json', root), 'utf8'));
-const offer = server.primaryCommercialOffer;
-const standard = server.standardChatAlternative;
+const offer = server.walletBalanceAlternative;
+const standard = server.primaryCommercialOffer;
 
 assert.equal(offer.routeId, 'evm-wallet-balance');
 assert.equal(offer.method, 'GET');

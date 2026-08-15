@@ -9,21 +9,21 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const hub = 'https://gpt55.558686.xyz/x402/service';
 const expected = {
-  routeId: 'evm-wallet-balance',
-  method: 'GET',
-  paidUrl: 'https://gpt55.558686.xyz/v1/tools/evm-wallet-balance',
-  price: '$0.001',
-  amountAtomic: '1000',
-};
-const expectedStandard = {
   routeId: 'standard-chat',
   method: 'POST',
   paidUrl: 'https://gpt55.558686.xyz/v1/chat/completions/standard',
   price: '$0.00293',
   amountAtomic: '2930',
 };
+const expectedWallet = {
+  routeId: 'evm-wallet-balance',
+  method: 'GET',
+  paidUrl: 'https://gpt55.558686.xyz/v1/tools/evm-wallet-balance',
+  price: '$0.001',
+  amountAtomic: '1000',
+};
 
-test('checked-in public artifacts converge on Wallet first with Standard preserved', async () => {
+test('checked-in public artifacts converge on GPT-5.6 Luna Standard first with Wallet preserved', async () => {
   const [serverJson, readme, page] = await Promise.all([
     readJson('server.json'),
     fs.readFile(new URL('../README.md', import.meta.url), 'utf8'),
@@ -36,10 +36,11 @@ test('checked-in public artifacts converge on Wallet first with Standard preserv
   assertPrimary(serverJson.buyerPaths?.[0], 'server buyerPaths[0]');
   assert.equal(serverJson.primaryRouteId, expected.routeId);
   assert.equal(serverJson.primaryPaidUrl, expected.paidUrl);
-  assertStandard(serverJson.standardChatAlternative, 'server Standard alternative');
-  assertStandard(serverJson.buyerPaths?.[1], 'server buyerPaths[1]');
+  assertStandard(serverJson.standardChatAlternative, 'server Standard compatibility path');
+  assertWallet(serverJson.walletBalanceAlternative, 'server Wallet alternative');
+  assertWallet(serverJson.buyerPaths?.[1], 'server buyerPaths[1]');
   assert.equal(serverJson.buyerPaths.filter(({ routeId }) => routeId === expected.routeId).length, 1);
-  assert.equal(serverJson.buyerPaths.filter(({ routeId }) => routeId === expectedStandard.routeId).length, 1);
+  assert.equal(serverJson.buyerPaths.filter(({ routeId }) => routeId === expectedWallet.routeId).length, 1);
   assert.equal(serverJson.nextPurchase?.routeId, 'api-codex-key-pack-100');
   assert.equal(serverJson.keyPackUpgradeOffer?.routeId, 'api-codex-key-pack-100');
   assertKeyPackUpgrade(serverJson.keyPackUpgradeOffer, 'server Key Pack upgrade');
@@ -48,13 +49,13 @@ test('checked-in public artifacts converge on Wallet first with Standard preserv
     assert.match(content, /GPT-5\.6 Luna Standard/i, `${label} product`);
     assert.match(content, /\$0\.00293/, `${label} price`);
     assert.match(content, /\/v1\/chat\/completions\/standard/, `${label} paid route`);
-    assert.match(content, /browser wallet/i, `${label} browser checkout`);
+    assert.match(content, /browser\s+wallet/i, `${label} browser checkout`);
     assert.match(content, /Key Pack[^\n<]*upgrade|upgrade[^\n<]*Key Pack/i, `${label} Key Pack upgrade`);
     assert.match(content, new RegExp(hub.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `${label} canonical hub`);
   }
 });
 
-test('wrapper fallback metadata converges on Wallet first with Standard preserved', async () => {
+test('wrapper fallback metadata converges on GPT-5.6 Luna Standard first with Wallet preserved', async () => {
   const port = await reservePort();
   const child = spawn(process.execPath, ['server.mjs'], {
     cwd: root,
@@ -71,8 +72,9 @@ test('wrapper fallback metadata converges on Wallet first with Standard preserve
       assertPrimary(document.primaryCommercialOffer, `${pathname} primary`);
       assertPrimary(document.firstPurchase, `${pathname} first`);
       assertPrimary(document.recommendedFirstPurchase, `${pathname} recommended`);
-      assertStandard(document.standardChatAlternative, `${pathname} Standard alternative`);
-      assertStandard(document.buyerPaths?.[1], `${pathname} buyerPaths[1]`);
+      assertStandard(document.standardChatAlternative, `${pathname} Standard compatibility path`);
+      assertWallet(document.walletBalanceAlternative, `${pathname} Wallet alternative`);
+      assertWallet(document.buyerPaths?.[1], `${pathname} buyerPaths[1]`);
       assert.equal(document.nextPurchase?.routeId, 'api-codex-key-pack-100');
       assert.equal(document.keyPackUpgradeOffer?.routeId, 'api-codex-key-pack-100');
       assertKeyPackUpgrade(document.keyPackUpgradeOffer, `${pathname} Key Pack upgrade`);
@@ -93,8 +95,15 @@ function assertPrimary(offer, label) {
 
 function assertStandard(offer, label) {
   assert.ok(offer, `${label} exists`);
-  for (const [field, value] of Object.entries(expectedStandard)) assert.equal(offer[field], value, `${label}.${field}`);
+  for (const [field, value] of Object.entries(expected)) assert.equal(offer[field], value, `${label}.${field}`);
   assert.equal(offer.browserCheckout?.available, true, `${label} browser checkout`);
+}
+
+function assertWallet(offer, label) {
+  assert.ok(offer, `${label} exists`);
+  for (const [field, value] of Object.entries(expectedWallet)) assert.equal(offer[field], value, `${label}.${field}`);
+  assert.equal(offer.browserCheckout?.available, true, `${label} browser checkout`);
+  assert.match(offer.agentFallback?.firstPaymentClient || '', /\/x402\/first-payment-client\.mjs$/, `${label} agent fallback`);
 }
 
 function assertKeyPackUpgrade(offer, label) {
