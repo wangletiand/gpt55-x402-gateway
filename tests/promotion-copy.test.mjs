@@ -10,6 +10,8 @@ test('public README leads with the current GPT-5.6 Luna purchase', async () => {
   for (const [label, pattern] of [
     ['OpenAI-compatible', /OpenAI-compatible/i],
     ['GPT-5.6 Luna Standard', /GPT-5\.6 Luna Standard/i],
+    ['GPT-5.6 Luna API Base USDC', /GPT-5\.6 Luna API Base USDC/i],
+    ['OpenAI-compatible x402 chat', /OpenAI-compatible x402 chat/i],
     ['$0.00293 USDC on Base', /\$0\.00293 USDC on Base/i],
     ['browser wallet', /browser\s+wallet/i],
     ['agent fallback', /agent\s+fallback/i],

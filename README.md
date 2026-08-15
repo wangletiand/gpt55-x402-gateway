@@ -6,6 +6,10 @@ wallet without handing over a private key, or use the quote-first agent
 fallback client when a wallet UI is unavailable. The $11.1112 Key Pack remains
 the upgrade for repeated calls.
 
+In search terms, this is a **GPT-5.6 Luna API Base USDC** product and an
+**OpenAI-compatible x402 chat** endpoint: one `POST` request, one live quote,
+and one response. The canonical buyer path is the service hub below.
+
 The EVM Wallet Balance Snapshot remains available as a separate utility
 alternative; it is not the model product.
 
