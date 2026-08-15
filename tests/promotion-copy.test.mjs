@@ -19,3 +19,13 @@ test('public README leads with the current GPT-5.6 Luna purchase', async () => {
   assert.match(readme, /ROUTE_ID=standard MAX_USDC=0\.00293/);
   assert.doesNotMatch(firstSection, /primary paid route is/i, 'Wallet Balance must not remain the lead product');
 });
+
+test('GitHub Pages exposes the canonical service hub to search agents', async () => {
+  const html = await fs.readFile(new URL('../docs/index.html', import.meta.url), 'utf8');
+
+  assert.match(html, /<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">/i);
+  assert.match(html, /<link rel="canonical" href="https:\/\/gpt55\.558686\.xyz\/x402\/service">/i);
+  assert.match(html, /<meta property="og:url" content="https:\/\/gpt55\.558686\.xyz\/x402\/service">/i);
+  assert.match(html, /<meta name="twitter:card" content="summary">/i);
+  assert.match(html, /<script type="application\/ld\+json">[\s\S]*GPT-5\.6 Luna Standard[\s\S]*0\.00293[\s\S]*standard-chat[\s\S]*<\/script>/i);
+});
