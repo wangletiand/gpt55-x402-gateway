@@ -1,14 +1,14 @@
-# GPT-5.6 Luna x402 API | GPT55 Gateway
+# x402 GPT API | GPT-5.6 Luna Base USDC Gateway
 
-GPT55 provides an OpenAI-compatible **GPT-5.6 Luna Standard** result over
-x402 for **$0.00293 USDC on Base**. Buyers can pay one request from a browser
-wallet without handing over a private key, or use the quote-first agent
-fallback client when a wallet UI is unavailable. The $11.1112 Key Pack remains
-the upgrade for repeated calls.
+GPT55 is an **x402 GPT API** gateway: it provides an OpenAI-compatible
+**GPT-5.6 Luna Standard** result for **$0.00293 USDC on Base**. This is a
+compatible gateway, not an OpenAI-operated product. Buyers can pay one
+request from a browser wallet without handing over a private key, or use the
+quote-first agent fallback client when a wallet UI is unavailable.
 
-In search terms, this is a **GPT-5.6 Luna API Base USDC** product and an
-**OpenAI-compatible x402 chat** endpoint: one `POST` request, one live quote,
-and one response. The canonical buyer path is the service hub below.
+The focused search topic is **x402 GPT API / GPT API with USDC on Base**:
+one `POST` request, one live quote, and one response. The canonical buyer path
+and complete integration guide are below.
 
 The EVM Wallet Balance Snapshot remains available as a separate utility
 alternative; it is not the model product.
@@ -17,6 +17,7 @@ Canonical service entry:
 
 - Service hub: <https://gpt55.558686.xyz/x402/service>
 - Machine-readable catalog: <https://gpt55.558686.xyz/x402/service.json>
+- x402 GPT API guide: <https://gpt55.558686.xyz/x402/guides/ai-agent-x402-api>
 - Main model route: `POST https://gpt55.558686.xyz/v1/chat/completions/standard`
 - Browser checkout: <https://gpt55.558686.xyz/x402/service?checkout=standard-chat>
 - Wallet alternative: <https://gpt55.558686.xyz/x402/service?checkout=evm-wallet-balance>
