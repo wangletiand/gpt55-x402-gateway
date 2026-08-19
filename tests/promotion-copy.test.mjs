@@ -31,5 +31,14 @@ test('GitHub Pages exposes the canonical service hub to search agents', async ()
   assert.match(html, /<link rel="canonical" href="https:\/\/gpt55\.558686\.xyz\/x402\/service">/i);
   assert.match(html, /<meta property="og:url" content="https:\/\/gpt55\.558686\.xyz\/x402\/service">/i);
   assert.match(html, /<meta name="twitter:card" content="summary">/i);
+  for (const [label, pattern] of [
+    ['x402 GPT API', /x402 GPT API/i],
+    ['GPT API with USDC on Base', /GPT API with USDC on Base/i],
+    ['integration guide', /https:\/\/gpt55\.558686\.xyz\/x402\/guides\/ai-agent-x402-api/i],
+    ['not an OpenAI-operated product', /not an OpenAI-operated product/i],
+  ]) {
+    assert.match(html, pattern, `GitHub Pages must expose ${label}`);
+  }
+  assert.doesNotMatch(html, /Key Pack is the upgrade for repeated calls/i);
   assert.match(html, /<script type="application\/ld\+json">[\s\S]*GPT-5\.6 Luna Standard[\s\S]*0\.00293[\s\S]*standard-chat[\s\S]*<\/script>/i);
 });
