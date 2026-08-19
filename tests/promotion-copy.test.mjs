@@ -6,13 +6,15 @@ test('public README leads with the current GPT-5.6 Luna purchase', async () => {
   const readme = await fs.readFile(new URL('../README.md', import.meta.url), 'utf8');
   const firstSection = readme.slice(0, readme.indexOf('## Agent Fallback'));
 
-  assert.match(firstSection, /^# GPT-5\.6 Luna x402 API \| GPT55 Gateway/m);
+  assert.match(firstSection, /^# x402 GPT API \| GPT-5\.6 Luna Base USDC Gateway/m);
   for (const [label, pattern] of [
+    ['x402 GPT API', /x402 GPT API/i],
+    ['GPT API with USDC on Base', /GPT API with USDC on Base/i],
     ['OpenAI-compatible', /OpenAI-compatible/i],
     ['GPT-5.6 Luna Standard', /GPT-5\.6 Luna Standard/i],
-    ['GPT-5.6 Luna API Base USDC', /GPT-5\.6 Luna API Base USDC/i],
-    ['OpenAI-compatible x402 chat', /OpenAI-compatible x402 chat/i],
     ['$0.00293 USDC on Base', /\$0\.00293 USDC on Base/i],
+    ['not an OpenAI-operated product', /not an OpenAI-operated product/i],
+    ['x402 GPT API guide', /https:\/\/gpt55\.558686\.xyz\/x402\/guides\/ai-agent-x402-api/i],
     ['browser wallet', /browser\s+wallet/i],
     ['agent fallback', /agent\s+fallback/i],
   ]) {
