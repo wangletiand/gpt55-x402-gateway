@@ -21,6 +21,7 @@ test('public README leads with the current GPT-5.6 Luna purchase', async () => {
     assert.match(firstSection, pattern, `README must expose ${label}`);
   }
   assert.match(readme, /ROUTE_ID=standard MAX_USDC=0\.00293/);
+  assert.match(readme, /ROUTE_ID=translate-canary MAX_USDC=0\.00293/);
   assert.doesNotMatch(firstSection, /primary paid route is/i, 'Wallet Balance must not remain the lead product');
 });
 
@@ -41,4 +42,6 @@ test('GitHub Pages exposes the canonical service hub to search agents', async ()
   }
   assert.doesNotMatch(html, /Key Pack is the upgrade for repeated calls/i);
   assert.match(html, /<script type="application\/ld\+json">[\s\S]*GPT-5\.6 Luna Standard[\s\S]*0\.00293[\s\S]*standard-chat[\s\S]*<\/script>/i);
+  assert.match(html, /Lowest-cost model first payment: translate canary/i);
+  assert.match(html, /ROUTE_ID=translate-canary MAX_USDC=0\.00293/);
 });

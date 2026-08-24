@@ -34,7 +34,7 @@ translate settlement canary before buying a model call or a larger pack:
 
 - Buyer guide: <https://gpt55.558686.xyz/x402/translate-first-purchase>
 - Paid route: `POST https://gpt55.558686.xyz/v1/tools/translate`
-- Quote-only command: `ROUTE_ID=translate-canary MAX_USDC=0.001 node first-payment-client.mjs`
+- Quote-only command: `ROUTE_ID=translate-canary MAX_USDC=0.00293 node first-payment-client.mjs`
 
 The client is quote-only by default. It verifies the live amount, Base network,
 USDC asset, merchant address, and same-request retry contract before an operator

@@ -62,6 +62,14 @@
       for the complete flow.</p>
     <p>The EVM Wallet Balance Snapshot remains available as a separate utility
       alternative at <strong>$0.001 USDC</strong>.</p>
+    <h2>Lowest-cost model first payment: translate canary</h2>
+    <p>Validate a buyer-owned x402 wallet or client with one short translation
+      before buying a larger model call. The live quote is
+      <strong>$0.00293 USDC</strong> on Base.</p>
+    <p><code>POST https://gpt55.558686.xyz/v1/tools/translate</code></p>
+    <p><code>ROUTE_ID=translate-canary MAX_USDC=0.00293 node first-payment-client.mjs</code></p>
+    <p>Quote-only is the default. Payment is an explicit buyer-owned runtime
+      opt-in after verifying amount, network, asset, and payTo.</p>
     <ul>
       <li><a href="https://gpt55.558686.xyz/x402/service">Service hub</a></li>
       <li><a href="https://gpt55.558686.xyz/x402/service?checkout=standard-chat">Buy GPT-5.6 Luna Standard</a></li>
