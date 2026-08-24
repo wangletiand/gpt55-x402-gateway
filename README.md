@@ -1,5 +1,7 @@
 # x402 GPT API | GPT-5.6 Luna Base USDC Gateway
 
+GPT55 x402 Gateway is the canonical buyer-owned Base USDC entry for this repository.
+
 GPT55 is an **x402 GPT API** gateway: it provides an OpenAI-compatible
 **GPT-5.6 Luna Standard** result for **$0.00293 USDC on Base**. This is a
 compatible gateway, not an OpenAI-operated product. Buyers can pay one
