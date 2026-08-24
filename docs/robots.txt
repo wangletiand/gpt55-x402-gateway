@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /gpt55-x402-gateway/
+Allow: /gpt55-x402-gateway/x402-gpt-api-guide.html
+Allow: /gpt55-x402-gateway/llms.txt
+Disallow: /gpt55-x402-gateway/node_modules/
+
+Sitemap: https://wangletiand.github.io/gpt55-x402-gateway/sitemap.xml

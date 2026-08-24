@@ -55,11 +55,16 @@
     <p>This is an <strong>x402 GPT API with USDC on Base</strong>, not an
       OpenAI-operated product. The endpoint provides one live quote, one POST
       request, and one response.</p>
+    <p>The Standard quote is <strong>2930 atomic USDC units</strong> on Base
+      <code>eip155:8453</code>; re-read the live 402 response immediately before payment.</p>
     <p><code>POST https://gpt55.558686.xyz/v1/chat/completions/standard</code></p>
     <p>Use the browser wallet checkout with an injected Base wallet, or the
       quote-first agent fallback when no wallet UI is available. Read the
       <a href="https://gpt55.558686.xyz/x402/guides/ai-agent-x402-api">x402 GPT API integration guide</a>
       for the complete flow.</p>
+    <p>For the focused buyer problem, read the static
+      <a href="x402-gpt-api-guide.html">x402 GPT API guide</a> with a runnable quote,
+      payment retry contract, and factual FAQ.</p>
     <p>The EVM Wallet Balance Snapshot remains available as a separate utility
       alternative at <strong>$0.001 USDC</strong>.</p>
     <h2>Lowest-cost model first payment: translate canary</h2>

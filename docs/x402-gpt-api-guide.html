@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>x402 GPT API Guide | OpenAI-Compatible GPT-5.6 Luna Standard on Base</title>
+  <meta name="description" content="Use an OpenAI-compatible x402 GPT API with Base USDC: quote one GPT-5.6 Luna request, pay from a buyer-owned wallet, and receive the JSON response without an API key or subscription.">
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
+  <link rel="canonical" href="https://gpt55.558686.xyz/x402/guides/ai-agent-x402-api">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="x402 GPT API Guide | OpenAI-Compatible GPT-5.6 Luna Standard on Base">
+  <meta property="og:description" content="A quote-first OpenAI-compatible GPT API paid per request with Base USDC over x402.">
+  <meta property="og:url" content="https://gpt55.558686.xyz/x402/guides/ai-agent-x402-api">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "x402 GPT API Guide | OpenAI-Compatible GPT-5.6 Luna Standard on Base",
+      "description": "Quote-first integration guide for the GPT55 OpenAI-compatible x402 GPT API.",
+      "url": "https://gpt55.558686.xyz/x402/guides/ai-agent-x402-api",
+      "mainEntity": {
+        "@type": "SoftwareApplication",
+        "name": "GPT55 x402 GPT API",
+        "applicationCategory": "DeveloperApplication",
+        "url": "https://gpt55.558686.xyz/x402/service",
+        "offers": {
+          "@type": "Offer",
+          "price": "0.00293",
+          "priceCurrency": "USD",
+          "url": "https://gpt55.558686.xyz/x402/service?checkout=standard-chat"
+        }
+      },
+      "about": ["x402 GPT API", "OpenAI-compatible API", "Base USDC", "pay per call"]
+    }
+  </script>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { max-width: 820px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
+    h1 { line-height: 1.2; letter-spacing: 0; }
+    h2 { margin-top: 2rem; }
+    code, pre { overflow-wrap: anywhere; }
+    code { padding: 2px 5px; background: color-mix(in srgb, CanvasText 8%, Canvas); }
+    pre { padding: 16px; overflow-x: auto; background: color-mix(in srgb, CanvasText 8%, Canvas); }
+    a { color: LinkText; }
+    .facts { border-left: 3px solid currentColor; padding-left: 16px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p><a href="https://gpt55.558686.xyz/x402/service">GPT55 x402 service hub</a></p>
+    <h1>x402 GPT API: OpenAI-compatible GPT-5.6 Luna Standard on Base</h1>
+    <p>GPT55 is an <strong>x402 GPT API</strong> for agents, scripts, and applications
+      that need one OpenAI-compatible result without an API key, account, or subscription.
+      The product is independent and is not operated by OpenAI.</p>
+    <p class="facts"><strong>Live contract:</strong> one
+      <code>POST /v1/chat/completions/standard</code> request costs
+      <strong>$0.00293 USDC</strong> (2930 atomic units) on Base
+      <code>eip155:8453</code>. The live HTTP 402 response is authoritative immediately
+      before payment.</p>
+
+    <h2>Use case</h2>
+    <p>Point an OpenAI-shaped client at a pay-per-call endpoint when a full API-key
+      onboarding flow is unnecessary. The request body uses the familiar
+      <code>model</code> and <code>messages</code> fields; successful delivery is an
+      OpenAI-compatible JSON response with usage metadata and x402 receipt headers.</p>
+
+    <h2>1. Inspect the quote</h2>
+    <pre><code>curl -i -X POST https://gpt55.558686.xyz/v1/chat/completions/standard \
+  -H 'Content-Type: application/json' \
+  -d '{"model":"gpt-5.6-luna","messages":[{"role":"user","content":"Reply with exactly: OK"}],"max_tokens":8}'</code></pre>
+    <p>The response is <code>402 Payment Required</code>. Confirm the amount is at most
+      <code>0.00293</code> USDC, the network is Base, the asset is canonical Base USDC,
+      and the recipient is the one shown in that live response.</p>
+
+    <h2>2. Pay and retry from the buyer runtime</h2>
+    <p>Use a buyer-owned browser wallet or a local x402 client. The private key stays
+      in that wallet or local process. Retry the <strong>same URL, method, and body</strong>
+      with the payment header returned by the client.</p>
+    <ul>
+      <li><a href="https://gpt55.558686.xyz/x402/service?checkout=standard-chat">Open browser-wallet checkout</a></li>
+      <li><a href="https://github.com/wangletiand/gpt55-x402-gateway/blob/main/first-payment-client.mjs">Quote-first client source</a></li>
+      <li><a href="https://gpt55.558686.xyz/x402/service">See all current services and live prices</a></li>
+    </ul>
+    <p>Accept the result only after HTTP 200 and a successful settlement response.
+      Receipts are evidence of a delivered request; directory reads and quote probes
+      are not purchases.</p>
+
+    <h2>Lowest-friction canary</h2>
+    <p>For a deterministic first payment, use the translate canary at
+      <code>POST https://gpt55.558686.xyz/v1/tools/translate</code> with the same
+      <code>$0.00293</code> Base USDC cap. The quote-first command is:</p>
+    <pre><code>ROUTE_ID=translate-canary MAX_USDC=0.00293 node first-payment-client.mjs</code></pre>
+    <p><a href="https://gpt55.558686.xyz/x402/translate-first-purchase">Read the translate canary buyer guide</a></p>
+
+    <h2>FAQ</h2>
+    <dl>
+      <dt><strong>Is this an OpenAI API key replacement?</strong></dt>
+      <dd>It is a separate OpenAI-compatible gateway. It does not issue OpenAI keys and is not an OpenAI-operated product.</dd>
+      <dt><strong>What is the first-request price?</strong></dt>
+      <dd>The current Standard route advertises $0.00293 USDC, or 2930 atomic units, on Base. Re-read the live 402 quote before paying.</dd>
+      <dt><strong>Do I need to give GPT55 a private key?</strong></dt>
+      <dd>No. Payment is signed by a buyer-owned browser wallet or local runtime. Never paste a private key into the service, a form, or a repository.</dd>
+      <dt><strong>What proves delivery?</strong></dt>
+      <dd>HTTP 200, the successful payment response, and the x402 receipt fields for that same request. Search visibility and quote volume are not revenue.</dd>
+    </dl>
+  </main>
+</body>
+</html>

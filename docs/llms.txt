@@ -1,0 +1,29 @@
+# GPT55 x402 GPT API
+
+GPT55 is an independent OpenAI-compatible x402 GPT API. It is not operated by OpenAI.
+
+## Canonical buyer path
+
+- Service hub: https://gpt55.558686.xyz/x402/service
+- Machine catalog: https://gpt55.558686.xyz/x402/service.json
+- Integration guide: https://gpt55.558686.xyz/x402/guides/ai-agent-x402-api
+- Browser checkout: https://gpt55.558686.xyz/x402/service?checkout=standard-chat
+- Browser wallet: sign from a buyer-owned wallet; no private key is sent to GPT55
+- Standard route: POST https://gpt55.558686.xyz/v1/chat/completions/standard
+
+## Current contract
+
+- Model: GPT-5.6 Luna Standard
+- Price: $0.00293 USDC per request
+- Amount: 2930 atomic USDC units
+- Network: Base, CAIP-2 eip155:8453
+- Payment asset: canonical Base USDC
+- Flow: quote-first request without payment -> HTTP 402 quote -> buyer-owned payment signature -> retry the same request -> HTTP 200 delivery
+
+The live HTTP 402 response is authoritative immediately before payment. Never send a private key to the service. Quote requests, crawlers, health checks, and self-payments are not external revenue.
+
+## Public source and quote-first client
+
+- Source: https://github.com/wangletiand/gpt55-x402-gateway
+- Quote-first client: https://github.com/wangletiand/gpt55-x402-gateway/blob/main/first-payment-client.mjs
+- Lowest-friction canary: POST https://gpt55.558686.xyz/v1/tools/translate

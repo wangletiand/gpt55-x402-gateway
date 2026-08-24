@@ -18,7 +18,10 @@ Canonical service entry:
 - Service hub: <https://gpt55.558686.xyz/x402/service>
 - Machine-readable catalog: <https://gpt55.558686.xyz/x402/service.json>
 - x402 GPT API guide: <https://gpt55.558686.xyz/x402/guides/ai-agent-x402-api>
+- Static buyer guide: <https://wangletiand.github.io/gpt55-x402-gateway/x402-gpt-api-guide.html>
+- Machine-readable summary: <https://wangletiand.github.io/gpt55-x402-gateway/llms.txt>
 - Main model route: `POST https://gpt55.558686.xyz/v1/chat/completions/standard`
+- Standard quote: `$0.00293` (`2930` atomic USDC units) on Base `eip155:8453`
 - Browser checkout: <https://gpt55.558686.xyz/x402/service?checkout=standard-chat>
 - Wallet alternative: <https://gpt55.558686.xyz/x402/service?checkout=evm-wallet-balance>
 - Key Pack upgrade: <https://x402-key.558686.xyz/x402/checkout>
