@@ -27,6 +27,20 @@ Canonical service entry:
 For the exact browser-wallet, Base MCP, agent fallback, receipt, and directory
 verification sequence, see [docs/demand-first-checkout.md](docs/demand-first-checkout.md).
 
+## Lowest-Friction First Payment
+
+When validating a buyer-owned wallet or x402 client, start with the deterministic
+translate settlement canary before buying a model call or a larger pack:
+
+- Buyer guide: <https://gpt55.558686.xyz/x402/translate-first-purchase>
+- Paid route: `POST https://gpt55.558686.xyz/v1/tools/translate`
+- Quote-only command: `ROUTE_ID=translate-canary MAX_USDC=0.001 node first-payment-client.mjs`
+
+The client is quote-only by default. It verifies the live amount, Base network,
+USDC asset, merchant address, and same-request retry contract before an operator
+explicitly opts into payment. A successful canary is the smallest real payment
+test; Standard chat is the next step for a useful GPT-5.6 Luna response.
+
 ## Agent Fallback
 
 The buyer client is quote-only by default. Its local policies pin the exact URL,
